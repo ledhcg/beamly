@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Biểu tượng TV có mũi tên phát (dùng cho logo, launcher icon). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Khung màn hình -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineJoin="round"
+        android:pathData="M4.5,4.5h15a1.5,1.5 0,0 1,1.5 1.5v9.5a1.5,1.5 0,0 1,-1.5 1.5h-15a1.5,1.5 0,0 1,-1.5 -1.5v-9.5a1.5,1.5 0,0 1,1.5 -1.5z" />
+    <!-- Chân đế -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M8,20.5h8" />
+    <!-- Mũi tên phát -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10.2,8.3v5.4l4.6,-2.7z" />
+</vector>

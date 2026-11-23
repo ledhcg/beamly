@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Mac2TV</string>
+    <string name="tagline">Mirror your Mac to this TV</string>
+
+    <string name="status_ready">Ready to connect</string>
+    <string name="status_starting">Starting…</string>
+
+    <string name="step_1">On your Mac, click the Mac2TV icon in the menu bar</string>
+    <string name="step_2">Choose “%1$s”</string>
+    <string name="step_3">Your Mac screen and sound will appear here</string>
+
+    <string name="label_tv_name">TV name</string>
+    <string name="label_address">Address</string>
+    <string name="no_network">Not connected to a network</string>
+    <string name="same_network_hint">Your Mac and this TV must be on the same Wi-Fi or LAN.</string>
+    <string name="cli_hint">Terminal: mac2tv %1$s</string>
+
+    <string name="notice_sender_stopped">Your Mac stopped mirroring.</string>
+    <string name="notice_connection_lost">Connection to your Mac was lost.</string>
+    <string name="notice_protocol_error">Received invalid data. Make sure Mac2TV on your Mac is up to date.</string>
+
+    <string name="connecting_to">Connecting to %1$s…</string>
+    <string name="mirroring_from">Mirroring from %1$s</string>
+
+    <string name="info_resolution">Resolution</string>
+    <string name="info_frame_rate">Frame rate</string>
+    <string name="info_bitrate">Bitrate</string>
+    <string name="info_audio">Audio</string>
+    <string name="info_audio_on">On</string>
+    <string name="info_audio_off">Off</string>
+    <string name="info_fps">%1$.0f fps</string>
+    <string name="info_mbps">%1$.1f Mbps</string>
+    <string name="info_hint">Press OK to hide · Press BACK twice to exit</string>
+    <string name="press_ok_for_info">Press OK for stream info</string>
+    <string name="press_back_again">Press BACK again to exit</string>
+
+    <string name="error_title">Can’t start receiver</string>
+    <string name="error_port_in_use">Port %1$d is used by another app. Close it and try again.</string>
+    <string name="error_generic">Network error: %1$s</string>
+    <string name="retry">Try again</string>
+    <string name="volume">Volume</string>
+    <string name="volume_muted">Muted</string>
+</resources>
