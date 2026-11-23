@@ -1,0 +1,18 @@
+# Sản phẩm build
+/build/
+android/.gradle/
+android/build/
+android/app/build/
+android/.kotlin/
+
+# Cấu hình riêng của máy / bí mật
+android/local.properties
+android/keystore.properties
+*.jks
+*.keystore
+
+# macOS / IDE
+.DS_Store
+.idea/
+*.iml
+*.log

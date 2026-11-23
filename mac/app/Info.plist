@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Mac2TV</string>
+    <key>CFBundleDisplayName</key>
+    <string>Mac2TV</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.mac2tv.sender</string>
+    <key>CFBundleExecutable</key>
+    <string>Mac2TV</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.2</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>Mac2TV cần truy cập mạng cục bộ để tìm và phát màn hình tới Android TV.</string>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_mac2tv._tcp</string>
+    </array>
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>Mac2TV cần ghi âm thanh hệ thống để phát trên TV và tắt tiếng loa Mac trong lúc phát.</string>
+    <key>NSScreenCaptureUsageDescription</key>
+    <string>Mac2TV cần quyền ghi màn hình và âm thanh hệ thống để phát lên TV.</string>
+</dict>
+</plist>

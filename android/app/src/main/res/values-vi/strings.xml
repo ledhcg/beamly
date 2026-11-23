@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">Phát màn hình Mac lên TV này</string>
+
+    <string name="status_ready">Sẵn sàng kết nối</string>
+    <string name="status_starting">Đang khởi động…</string>
+
+    <string name="step_1">Trên Mac, bấm biểu tượng Mac2TV trên thanh menu</string>
+    <string name="step_2">Chọn “%1$s”</string>
+    <string name="step_3">Màn hình và âm thanh của Mac sẽ hiện ở đây</string>
+
+    <string name="label_tv_name">Tên TV</string>
+    <string name="label_address">Địa chỉ</string>
+    <string name="no_network">Chưa kết nối mạng</string>
+    <string name="same_network_hint">Mac và TV cần cùng mạng Wi-Fi hoặc LAN.</string>
+    <string name="cli_hint">Terminal: mac2tv %1$s</string>
+
+    <string name="notice_sender_stopped">Mac đã dừng phát.</string>
+    <string name="notice_connection_lost">Mất kết nối với Mac.</string>
+    <string name="notice_protocol_error">Dữ liệu không hợp lệ. Hãy cập nhật Mac2TV trên Mac.</string>
+
+    <string name="connecting_to">Đang kết nối với %1$s…</string>
+    <string name="mirroring_from">Đang phát từ %1$s</string>
+
+    <string name="info_resolution">Độ phân giải</string>
+    <string name="info_frame_rate">Khung hình</string>
+    <string name="info_bitrate">Bitrate</string>
+    <string name="info_audio">Âm thanh</string>
+    <string name="info_audio_on">Bật</string>
+    <string name="info_audio_off">Tắt</string>
+    <string name="info_fps">%1$.0f fps</string>
+    <string name="info_mbps">%1$.1f Mbps</string>
+    <string name="info_hint">Nhấn OK để ẩn · Nhấn BACK hai lần để thoát</string>
+    <string name="press_ok_for_info">Nhấn OK để xem thông tin</string>
+    <string name="press_back_again">Nhấn BACK lần nữa để thoát</string>
+
+    <string name="error_title">Không thể khởi động</string>
+    <string name="error_port_in_use">Cổng %1$d đang bị ứng dụng khác dùng. Hãy đóng ứng dụng đó rồi thử lại.</string>
+    <string name="error_generic">Lỗi mạng: %1$s</string>
+    <string name="retry">Thử lại</string>
+    <string name="volume">Âm lượng</string>
+    <string name="volume_muted">Tắt tiếng</string>
+</resources>
