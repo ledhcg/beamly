@@ -729,7 +729,7 @@ final class OutputVolumeMonitor {
     }()
 
     func start() {
-        q.async {
+        q.async { [self] in
             let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in self?.attachToDefault() }
             if AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &self.defaultAddress, self.q, block) == noErr {
                 self.defaultListener = block
