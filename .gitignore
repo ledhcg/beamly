@@ -16,3 +16,7 @@ android/keystore.properties
 .idea/
 *.iml
 *.log
+/dist/
+macos/.build/
+macos/.swiftpm/
+android/release.jks
