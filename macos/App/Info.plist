@@ -3,36 +3,46 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Mac2TV</string>
+    <string>Beamly</string>
     <key>CFBundleDisplayName</key>
-    <string>Mac2TV</string>
+    <string>Beamly</string>
+    <!-- Legacy identifier kept so existing installs keep their privacy permissions. -->
     <key>CFBundleIdentifier</key>
     <string>com.mac2tv.sender</string>
     <key>CFBundleExecutable</key>
-    <string>Mac2TV</string>
+    <string>Beamly</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>vi</string>
+    </array>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>$(VERSION)</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>$(BUILD_NUMBER)</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.2</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © The Beamly contributors. Licensed under the Apache License 2.0.</string>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>Mac2TV cần truy cập mạng cục bộ để tìm và phát màn hình tới Android TV.</string>
+    <string>Beamly uses the local network to find your TV and stream to it.</string>
     <key>NSBonjourServices</key>
     <array>
-        <string>_mac2tv._tcp</string>
+        <string>_beamly._tcp</string>
     </array>
     <key>NSAudioCaptureUsageDescription</key>
-    <string>Mac2TV cần ghi âm thanh hệ thống để phát trên TV và tắt tiếng loa Mac trong lúc phát.</string>
+    <string>Beamly records system audio to play it on your TV and keep the Mac's speakers silent while streaming.</string>
     <key>NSScreenCaptureUsageDescription</key>
-    <string>Mac2TV cần quyền ghi màn hình và âm thanh hệ thống để phát lên TV.</string>
+    <string>Beamly records your screen to show it on your TV.</string>
 </dict>
 </plist>
