@@ -17,6 +17,10 @@
 > **Status: pre-1.0.** Streams are paired and end-to-end encrypted; the protocol may still change before 1.0.
 > See [Security](#security).
 
+<p align="center">
+  <img src="docs/images/tv-stream-info.jpg" width="820" alt="A Mac screen mirrored on a TV with Beamly's stream details panel">
+</p>
+
 ## Features
 
 - **Screen mirroring** at up to 1440p / 60 fps with VideoToolbox (Mac) and MediaCodec (TV) hardware codecs.
@@ -65,6 +69,10 @@ adb install -r beamly-tv.apk
    on the Mac and choose **Allow** on the TV.
 4. Click the TV again (or **Stop Streaming**) to stop.
 
+| Waiting for a Mac | First-time pairing | Paired Macs |
+|---|---|---|
+| ![Beamly waiting screen on the TV](docs/images/tv-waiting.jpg) | ![Pairing code on the TV](docs/images/tv-pairing.jpg) | ![List of paired Macs on the TV](docs/images/tv-paired-macs.jpg) |
+
 Paired Macs are listed on the TV under **Paired Macs**, where they can be forgotten. On the Mac, use
 **Forget Paired TVs…** in the menu (or `beamly --forget-tvs`).
 
@@ -78,6 +86,8 @@ beamly --tv "Living Room"   # choose a TV by name
 beamly 192.168.1.20         # connect by address
 beamly --width 2560 --fps 60 --bitrate 20
 beamly --keep-mac-audio     # also play sound on the Mac
+beamly --name "Studio"      # name shown on the TV instead of the computer name
+beamly --forget-tvs         # forget paired TVs
 beamly --help
 ```
 

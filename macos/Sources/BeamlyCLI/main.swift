@@ -29,6 +29,7 @@ func usage() -> Never {
 
         Options:
           --tv NAME           Pick a TV by name when several are found
+          --name NAME         Name shown on the TV (default: this Mac's computer name)
           --port N            TCP port on the TV (default \(BeamlyProtocol.defaultPort))
           --fps N             Frames per second (default 60)
           --bitrate N         Video bitrate in Mbps (default 12)
@@ -68,6 +69,7 @@ do {
                 exit(exitStreamError)
             }
         case "--tv": tvName = next()
+        case "--name": options.deviceName = next()
         case "--no-audio": options.audio = false
         case "--keep-mac-audio": options.muteMacOutput = false
         case "-h", "--help": usage()

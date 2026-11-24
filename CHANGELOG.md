@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Pairing: the first connection between a Mac and a TV shows the same 6-digit code on both screens; both users
   confirm it. The TV lists paired Macs and can forget them; the Mac can forget paired TVs (menu or
   `beamly --forget-tvs`).
+- `beamly --name` sets the name shown on the TV.
+- README screenshots.
 - End-to-end encryption: authenticated key exchange and AES-256-GCM for every packet.
 
 ### Changed
