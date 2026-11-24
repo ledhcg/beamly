@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.OutlinedButton
 import androidx.tv.material3.Text
 import app.beamly.tv.BuildConfig
 import app.beamly.tv.Notice
@@ -69,84 +70,91 @@ fun StartingScreen() = FullScreenBackground {
 }
 
 @Composable
-fun WaitingScreen(state: ReceiverUiState.Waiting, onNoticeShown: () -> Unit) = FullScreenBackground {
-    if (state.notice != null) {
-        LaunchedEffect(state.notice) {
-            kotlinx.coroutines.delay(10_000)
-            onNoticeShown()
+fun WaitingScreen(state: ReceiverUiState.Waiting, pairedCount: Int, onShowPairedMacs: () -> Unit, onNoticeShown: () -> Unit) =
+    FullScreenBackground {
+        val focus = remember { FocusRequester() }
+        LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+        if (state.notice != null) {
+            LaunchedEffect(state.notice) {
+                kotlinx.coroutines.delay(10_000)
+                onNoticeShown()
+            }
         }
-    }
-    Row(SafeArea.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-        // Left column: branding and instructions
-        Column(Modifier.weight(1.15f).padding(end = 48.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                AppLogo(72.dp)
-                Spacer(Modifier.width(20.dp))
-                Column {
-                    Text(
-                        stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.displaySmall,
-                        color = BeamlyColors.OnSurface,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(stringResource(R.string.tagline), style = MaterialTheme.typography.titleLarge, color = BeamlyColors.Muted)
+        Row(SafeArea.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+            // Left column: branding and instructions
+            Column(Modifier.weight(1.15f).padding(end = 48.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AppLogo(72.dp)
+                    Spacer(Modifier.width(20.dp))
+                    Column {
+                        Text(
+                            stringResource(R.string.app_name),
+                            style = MaterialTheme.typography.displaySmall,
+                            color = BeamlyColors.OnSurface,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(stringResource(R.string.tagline), style = MaterialTheme.typography.titleLarge, color = BeamlyColors.Muted)
+                    }
                 }
-            }
-            Spacer(Modifier.height(56.dp))
-            NumberedStep(1, stringResource(R.string.step_1))
-            Spacer(Modifier.height(24.dp))
-            NumberedStep(2, stringResource(R.string.step_2, state.deviceName))
-            Spacer(Modifier.height(24.dp))
-            NumberedStep(3, stringResource(R.string.step_3))
-            state.notice?.let { notice ->
-                Spacer(Modifier.height(40.dp))
-                NoticeBanner(noticeText(notice), BeamlyColors.Warning)
-            }
-        }
-
-        // Right column: status and connection details
-        Panel(Modifier.weight(0.85f)) {
-            Column(Modifier.fillMaxWidth().padding(36.dp)) {
-                StatusPill(stringResource(R.string.status_ready), BeamlyColors.Success, pulsing = true)
-                Spacer(Modifier.height(32.dp))
-                Text(stringResource(R.string.label_tv_name), style = MaterialTheme.typography.bodyLarge, color = BeamlyColors.Muted)
-                Text(
-                    state.deviceName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = BeamlyColors.OnSurface,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Spacer(Modifier.height(56.dp))
+                NumberedStep(1, stringResource(R.string.step_1))
                 Spacer(Modifier.height(24.dp))
-                Text(stringResource(R.string.label_address), style = MaterialTheme.typography.bodyLarge, color = BeamlyColors.Muted)
-                Text(
-                    state.address?.let { "$it:${state.port}" } ?: stringResource(R.string.no_network),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = if (state.address != null) BeamlyColors.OnSurface else BeamlyColors.Warning
-                )
-                Spacer(Modifier.height(32.dp))
-                Text(
-                    stringResource(R.string.same_network_hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = BeamlyColors.Muted
-                )
-                state.address?.let {
-                    Spacer(Modifier.height(8.dp))
+                NumberedStep(2, stringResource(R.string.step_2, state.deviceName))
+                Spacer(Modifier.height(24.dp))
+                NumberedStep(3, stringResource(R.string.step_3))
+                state.notice?.let { notice ->
+                    Spacer(Modifier.height(40.dp))
+                    NoticeBanner(noticeText(notice), BeamlyColors.Warning)
+                }
+            }
+
+            // Right column: status and connection details
+            Panel(Modifier.weight(0.85f)) {
+                Column(Modifier.fillMaxWidth().padding(36.dp)) {
+                    StatusPill(stringResource(R.string.status_ready), BeamlyColors.Success, pulsing = true)
+                    Spacer(Modifier.height(32.dp))
+                    Text(stringResource(R.string.label_tv_name), style = MaterialTheme.typography.bodyLarge, color = BeamlyColors.Muted)
                     Text(
-                        stringResource(R.string.cli_hint, it),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = BeamlyColors.Muted.copy(alpha = 0.7f)
+                        state.deviceName,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = BeamlyColors.OnSurface,
+                        fontWeight = FontWeight.SemiBold
                     )
+                    Spacer(Modifier.height(24.dp))
+                    Text(stringResource(R.string.label_address), style = MaterialTheme.typography.bodyLarge, color = BeamlyColors.Muted)
+                    Text(
+                        state.address?.let { "$it:${state.port}" } ?: stringResource(R.string.no_network),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = if (state.address != null) BeamlyColors.OnSurface else BeamlyColors.Warning
+                    )
+                    Spacer(Modifier.height(32.dp))
+                    Text(
+                        stringResource(R.string.same_network_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = BeamlyColors.Muted
+                    )
+                    state.address?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.cli_hint, it),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = BeamlyColors.Muted.copy(alpha = 0.7f)
+                        )
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    OutlinedButton(onClick = onShowPairedMacs, modifier = Modifier.focusRequester(focus)) {
+                        Text(stringResource(R.string.paired_macs_button, pairedCount))
+                    }
                 }
             }
         }
+        Text(
+            "v${BuildConfig.VERSION_NAME}",
+            style = MaterialTheme.typography.bodySmall,
+            color = BeamlyColors.Muted.copy(alpha = 0.5f),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 64.dp, vertical = 24.dp)
+        )
     }
-    Text(
-        "v${BuildConfig.VERSION_NAME}",
-        style = MaterialTheme.typography.bodySmall,
-        color = BeamlyColors.Muted.copy(alpha = 0.5f),
-        modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 64.dp, vertical = 24.dp)
-    )
-}
 
 @Composable
 fun ConnectingScreen(state: ReceiverUiState.Connecting) = FullScreenBackground {
@@ -300,5 +308,9 @@ private fun noticeText(notice: Notice): String = stringResource(
         Notice.CONNECTION_LOST -> R.string.notice_connection_lost
         Notice.PROTOCOL_ERROR -> R.string.notice_protocol_error
         Notice.INCOMPATIBLE_VERSION -> R.string.notice_incompatible_version
+        Notice.NOT_PAIRED -> R.string.notice_not_paired
+        Notice.PAIRING_DECLINED -> R.string.notice_pairing_declined
+        Notice.PAIRING_CANCELLED -> R.string.notice_pairing_cancelled
+        Notice.PAIRING_TIMED_OUT -> R.string.notice_pairing_timed_out
     }
 )

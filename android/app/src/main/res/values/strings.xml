@@ -42,4 +42,22 @@
     <string name="retry">Try again</string>
     <string name="volume">Volume</string>
     <string name="volume_muted">Muted</string>
+
+    <string name="notice_not_paired">This Mac is no longer paired. Stream again to pair it.</string>
+    <string name="notice_pairing_declined">Pairing was declined.</string>
+    <string name="notice_pairing_cancelled">Pairing was cancelled on the Mac.</string>
+    <string name="notice_pairing_timed_out">Pairing timed out.</string>
+
+    <string name="pairing_title">Pair with “%1$s”?</string>
+    <string name="pairing_instructions">Make sure your Mac shows the same code. Only paired Macs can stream to this TV.</string>
+    <string name="pairing_allow">Allow</string>
+    <string name="pairing_deny">Don’t Allow</string>
+    <string name="pairing_waiting">Waiting for your Mac to confirm…</string>
+
+    <string name="paired_macs_button">Paired Macs (%1$d)</string>
+    <string name="paired_macs_title">Paired Macs</string>
+    <string name="paired_macs_hint">These Macs can stream to this TV. A forgotten Mac must confirm a pairing code again.</string>
+    <string name="paired_macs_empty">No Macs are paired yet. A Mac is paired the first time it streams to this TV.</string>
+    <string name="paired_macs_paired_on">Paired %1$s</string>
+    <string name="paired_macs_forget">Forget</string>
 </resources>

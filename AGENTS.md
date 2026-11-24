@@ -95,11 +95,17 @@ Packet framing (big-endian): `u32 length | u8 type | u64 ptsMicros | payload[len
 | 3 | AUDIO | PCM s16le, 48 kHz, stereo, interleaved |
 | 4 | BYE | empty — sender stopped on purpose |
 | 5 | PING | empty — heartbeat every second |
-| 6 | HELLO | `u16 protocolVersion` + UTF-8 device name, sent first on every connection |
+| 6 | HELLO | `u16 version, u8[16] deviceId, u8[65] identityKey, u8[65] ephemeralKey`, UTF-8 name; first packet |
 | 7 | VOLUME | `f32 volume, f32 gain, u8 muted` |
+| 8–15 | SERVER_HELLO, PAIR_START, PAIR_COMMIT, PAIR_NONCE, PAIR_CONFIRM, SESSION_START, READY, REJECT | handshake and pairing, see `docs/PROTOCOL.md` §5–§6 |
+
+Packets 0–5 and 7 travel inside AES-256-GCM records after `SESSION_START` (`docs/PROTOCOL.md` §4.2).
 
 Rules:
-- Implementations: `macos/Sources/BeamlyKit/Protocol.swift` and `android/app/src/main/java/app/beamly/tv/net/Protocol.kt`. The current version is 1 (`BeamlyProtocol.version` / `Protocol.VERSION`); receivers reject other versions.
+- Implementations: `macos/Sources/BeamlyKit/Protocol.swift` and `android/app/src/main/java/app/beamly/tv/net/Protocol.kt`. The current version is 2 (`BeamlyProtocol.version` / `Protocol.VERSION`); receivers reject other versions.
+- Cryptography lives in `SessionCrypto` on both sides (CryptoKit on macOS, the platform JCA on Android) and must
+  reproduce `protocol/test-vectors/crypto.json` byte for byte. Regenerate it with
+  `swift protocol/generate_crypto_vectors.swift` (CI fails if it is stale).
 - Receivers **must ignore unknown packet types**. New features add new types; never change the meaning or layout of an existing type without a protocol version bump.
 - The sender must send `HELLO` immediately after connecting. The receiver only promotes a connection to the active session after it has received data (this defends against Network.framework "Happy Eyeballs" opening parallel connections and abandoning the losers).
 - The sender must send `PING` at least every second and `BYE` before a deliberate disconnect. The receiver treats 4 s of silence as a lost connection. Never rely on TCP FIN alone; it is not delivered reliably when the sender process exits.
@@ -175,9 +181,17 @@ Media (each rule below prevented a real bug):
 
 ## 10. Security and privacy
 
+Cryptography rules (each protects a property in `docs/PROTOCOL.md` §2):
+- Never send media, audio or volume before the handshake completed (`READY` on the Mac, `SESSION_START` + paired key on the TV).
+- Never reuse a record counter or key; never add a code path that skips GCM authentication or ignores a failed `open`.
+- Validate every public key received from the network (on-curve check) before ECDH.
+- Generate ephemeral keys and nonces per connection with a secure RNG; never derive them from timestamps or IDs.
+- Do not log keys, nonces, pairing codes or decrypted payloads.
+- Any change to the handshake, key derivation or record format needs a protocol version bump and new fixtures.
+
 - Never commit secrets: signing identities, keystores, passwords, API tokens, Apple ID credentials.
 - Release signing: `android/keystore.properties` (git-ignored, written by CI from secrets) and the Developer ID secrets listed in `docs/RELEASING.md`. The debug-keystore fallback is for local builds only.
-- The current protocol is **unauthenticated and unencrypted**. Do not add features that send data beyond the screen and audio the user chose to share, and do not add telemetry or network traffic outside the LAN.
+- Do not add features that send data beyond the screen and audio the user chose to share, and do not add telemetry or network traffic outside the LAN.
 - Treat all bytes from the network as untrusted: validate lengths and enum values; malformed input must end the session, not crash the app.
 
 ---

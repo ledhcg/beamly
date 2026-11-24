@@ -9,6 +9,9 @@ let exitStreamError: Int32 = 2
 let exitPermission: Int32 = 6
 let exitNoTV: Int32 = 7
 
+// Line-buffered output, so progress is visible when the output is piped or redirected to a file.
+setvbuf(stdout, nil, _IOLBF, 0)
+
 var host = ""
 var tvName: String?
 var port = BeamlyProtocol.defaultPort
@@ -34,6 +37,7 @@ func usage() -> Never {
           --no-audio          Do not send audio
           --keep-mac-audio    Keep playing sound on the Mac (default: sound plays on the TV only)
           --list              List displays and exit
+          --forget-tvs        Forget every paired TV and exit (the next connection pairs again)
           -h, --help          Show this help
         """)
     exit(exitUsage)
@@ -54,6 +58,15 @@ do {
         case "--width": options.width = Int(next()) ?? 1920
         case "--display": options.display = Int(next()) ?? 0
         case "--list": listOnly = true
+        case "--forget-tvs":
+            do {
+                try TrustStore.shared.forgetAllTVs()
+                print("Forgot all paired TVs.")
+                exit(0)
+            } catch {
+                print("Error: \(error.localizedDescription)")
+                exit(exitStreamError)
+            }
         case "--tv": tvName = next()
         case "--no-audio": options.audio = false
         case "--keep-mac-audio": options.muteMacOutput = false
@@ -78,6 +91,8 @@ func run(_ endpoint: NWEndpoint) {
         switch event {
         case .connected(let address):
             print("Connected to the TV (\(address))")
+        case .pairing(let code, let tvName, let respond):
+            confirmPairing(code: code, tvName: tvName, respond: respond)
         case .streaming(let description):
             print("Streaming \(description). Press Ctrl+C to stop.")
         case .stats(let fps, let dropped):
@@ -93,6 +108,26 @@ func run(_ endpoint: NWEndpoint) {
         }
     }
     session?.start()
+}
+
+/// Asks the user to compare the pairing code shown here with the one on the TV.
+func confirmPairing(code: String, tvName: String, respond: @escaping (Bool) -> Void) {
+    print(
+        """
+
+        Pairing with "\(tvName)" for the first time.
+        Check that the TV shows the code   \(code)
+        Press Return if it matches (then choose Allow on the TV), or type n and press Return to cancel.
+        """)
+    // stdin is read on a background thread so the main run loop keeps the session alive.
+    Thread.detachNewThread {
+        let answer = readLine()?.trimmingCharacters(in: .whitespaces).lowercased() ?? "n"
+        let accepted = answer.isEmpty || answer == "y" || answer == "yes"
+        DispatchQueue.main.async {
+            print(accepted ? "Confirmed. Waiting for the TV…" : "Pairing cancelled.")
+            respond(accepted)
+        }
+    }
 }
 
 if listOnly {

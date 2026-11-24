@@ -26,3 +26,14 @@
 "alert.permission.body" = "Open System Settings › Privacy & Security › Screen & System Audio Recording, turn on Beamly, then reopen the app.";
 "alert.permission.open" = "Open System Settings";
 "alert.permission.later" = "Not Now";
+
+/* Pairing */
+"status.pairing" = "Pairing with %@…";
+"alert.pairing.title" = "Pair with “%@”?";
+"alert.pairing.body" = "Check that the TV shows the same code, then confirm on both devices:\n\n%@";
+"alert.pairing.confirm" = "Codes Match";
+"alert.pairing.cancel" = "Cancel";
+"menu.forgetTVs" = "Forget Paired TVs…";
+"alert.forget.title" = "Forget all paired TVs?";
+"alert.forget.body" = "The next time you stream to a TV, you will confirm a pairing code again.";
+"alert.forget.confirm" = "Forget";

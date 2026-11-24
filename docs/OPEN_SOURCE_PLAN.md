@@ -1,6 +1,6 @@
 # Open-Source Readiness Plan
 
-Status: **Phases 1–4 and 6 done, Phase 5 open** · Owner: @ledhcg · Last updated: 2026-11-24
+Status: **Phases 1–6 done; Phase 7 (going public) open** · Owner: @ledhcg · Last updated: 2026-11-24
 
 This plan takes the repository from a private prototype to a public, professionally maintained
 open-source project. Phases are ordered by dependency; each phase ends with a checklist that must be
@@ -22,7 +22,7 @@ D6 (pairing + encryption) remains the blocker for 1.0.
 | D3 | **macOS distribution** | Unsigned build / Developer ID + notarization | **Developer ID + notarization** (requires the paid Apple Developer Program). Unsigned apps are blocked by Gatekeeper and need screen/audio permissions to be re-granted on every update. |
 | D4 | **Android distribution** | GitHub Releases APK / Google Play / F-Droid | **GitHub Releases** first; Play Store later (needs a store listing and a privacy policy). |
 | D5 | **Minimum versions** | — | macOS 14.2 (Core Audio process taps), Android 8.0 / API 26. |
-| D6 | **Security baseline for 1.0** | Ship as-is / pairing + encryption | **Pairing + encryption before 1.0** (see Phase 5). Today any device on the LAN can stream to the TV. |
+| D6 | **Security baseline for 1.0** | Ship as-is / pairing + encryption | **Pairing + encryption before 1.0** — done in protocol v2 (Phase 5). |
 
 ---
 
@@ -114,9 +114,9 @@ Goal: a layout that new contributors understand in five minutes and that CI can 
 
 ---
 
-## Phase 5 — Security and privacy hardening (blocks 1.0) — not started
+## Phase 5 — Security and privacy hardening (blocks 1.0) — done (protocol v2)
 
-Current risks:
+Risks addressed:
 
 1. **No authentication** — any device on the LAN can connect to port 7878 and take over the TV screen.
 2. **No encryption** — screen contents and audio travel in clear text on the LAN.
@@ -124,11 +124,16 @@ Current risks:
 
 Planned work:
 
-- [ ] Pairing: TV shows a 6-digit code; the Mac stores a per-TV key after the first successful pairing.
-- [ ] Transport encryption: TLS 1.3 with the paired key (or Noise protocol framework); bump the protocol major version.
-- [ ] "Allow connections from" setting on the TV (paired Macs only / anyone on this network).
-- [ ] Fuzz tests for `PacketReader` and `VideoConfig.parse` (malformed input must never crash the receiver).
-- [ ] Privacy statement in the README: no telemetry, no network traffic outside the LAN.
+- [x] Pairing by numeric comparison: both screens show the same 6-digit code, both users confirm; identity keys
+      (P-256) are stored on both sides. Paired Macs can be forgotten on the TV, paired TVs on the Mac.
+- [x] Transport encryption: authenticated ECDH (identity + ephemeral keys) → HKDF-SHA256 → AES-256-GCM records in
+      both directions; protocol version 2. *Deviation: a purpose-built handshake instead of TLS 1.3 or Noise, because
+      neither is available on both platforms without third-party dependencies; it is specified in docs/PROTOCOL.md
+      and pinned by cross-platform fixtures.*
+- [x] ~~"Allow connections from" setting~~ — dropped: pairing is always required (secure by default).
+- [x] Fuzz tests for `PacketReader`, encrypted records and every payload parser (`FuzzTest.kt`).
+- [x] Privacy statement in the README: no telemetry, no network traffic outside the LAN.
+- [ ] External review of the handshake by someone with a cryptography background before 1.0.
 
 ---
 

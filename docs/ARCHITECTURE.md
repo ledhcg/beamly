@@ -45,6 +45,8 @@ A Swift package with three products:
 | `OutputVolumeMonitor` | Default output device volume/mute listeners → `VOLUME` packets | `app.beamly.volume` |
 | `TVBrowser` | DNS-SD browsing, de-duplication by name | `app.beamly.browser` → main |
 | `PacketCodec` | Pure encoding functions, unit-tested against shared fixtures | — |
+| `SessionCrypto`, `RecordCipher` | Pairing commitment and code, session key derivation, AES-256-GCM records (CryptoKit) | `app.beamly.net` |
+| `TrustStore` | This Mac's identity key and the paired TVs, in `~/Library/Application Support/Beamly/` | any (locked) |
 
 ### Audio routing
 
@@ -60,7 +62,7 @@ Single-activity app, package `app.beamly.tv` (application ID `com.mac2tv.receive
 
 | Package | Contents |
 |---------|----------|
-| `net` | `Protocol` (pure Kotlin, JVM-tested), `StreamServer`, `StreamSession`, `NsdAdvertiser`, `DeviceInfo` |
+| `net` | `Protocol` and `SessionCrypto` (pure Kotlin, JVM-tested), `StreamServer`, `StreamSession` (handshake, pairing, streaming), `PairingStore`, `NsdAdvertiser`, `DeviceInfo` |
 | `media` | `VideoDecoder` (MediaCodec), `AudioPlayer` (AudioTrack) |
 | root | `MainActivity`, `ReceiverViewModel` (UI state) |
 | `ui` | Compose for TV screens and components, theme |
@@ -75,9 +77,18 @@ Single-activity app, package `app.beamly.tv` (application ID `com.mac2tv.receive
   session other than the active one are ignored.
 - The server runs between `onStart` and `onStop`, so the TV only advertises while Beamly is on screen.
 
+### Pairing and encryption
+
+The handshake runs on the session thread before any media is accepted (protocol §6). For pairing, the session
+reports the code to `ReceiverViewModel` and keeps reading packets; the user's Allow/Deny answer is picked up after
+the next packet, which arrives within a second because the Mac pings every second. After `SESSION_START`,
+`PacketReader` and `PacketWriter` switch to `RecordCipher` for their direction. On the Mac, `Sender` runs the same
+state machine on its network queue and reports the code through `StreamEvent.pairing`.
+
 ### UI states
 
-`Starting → Waiting ⇄ Connecting → Streaming`, plus `Failed` (port unavailable). The waiting screen shows the
+`Starting → Waiting ⇄ (Pairing →) Connecting → Streaming`, plus `Failed` (port unavailable) and the
+Paired Macs screen reachable from Waiting. The waiting screen shows the
 reason the previous session ended (sender stopped, connection lost, protocol error, incompatible version).
 
 ## Design decisions
@@ -88,4 +99,6 @@ reason the previous session ended (sender stopped, connection lost, protocol err
 | Uncompressed PCM audio | ~1.5 Mbit/s is negligible on a LAN and avoids codec latency |
 | Render on decode, ignore PTS | Mirroring favours latency over smoothness |
 | Heartbeat + BYE instead of TCP close detection | FIN is not reliably delivered when the sender exits |
+| Own handshake (P-256 ECDH + HKDF + AES-GCM) instead of TLS or Noise | No third-party dependencies on either platform; X25519 needs Android 12, P-256 works on Android 8 |
+| Numeric comparison instead of a PIN typed on the Mac | Same security as Bluetooth SSP numeric comparison without a password-authenticated key exchange library |
 | Process tap instead of muting the output device | macOS unmutes the device when volume keys are pressed |

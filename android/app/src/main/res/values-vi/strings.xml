@@ -41,4 +41,22 @@
     <string name="retry">Thử lại</string>
     <string name="volume">Âm lượng</string>
     <string name="volume_muted">Tắt tiếng</string>
+
+    <string name="notice_not_paired">Mac này không còn được ghép đôi. Hãy phát lại để ghép đôi.</string>
+    <string name="notice_pairing_declined">Đã từ chối ghép đôi.</string>
+    <string name="notice_pairing_cancelled">Mac đã huỷ ghép đôi.</string>
+    <string name="notice_pairing_timed_out">Hết thời gian ghép đôi.</string>
+
+    <string name="pairing_title">Ghép đôi với “%1$s”?</string>
+    <string name="pairing_instructions">Kiểm tra Mac hiện đúng mã này. Chỉ những Mac đã ghép đôi mới phát được lên TV.</string>
+    <string name="pairing_allow">Cho phép</string>
+    <string name="pairing_deny">Không cho phép</string>
+    <string name="pairing_waiting">Đang chờ Mac xác nhận…</string>
+
+    <string name="paired_macs_button">Mac đã ghép đôi (%1$d)</string>
+    <string name="paired_macs_title">Mac đã ghép đôi</string>
+    <string name="paired_macs_hint">Các Mac này được phép phát lên TV. Mac bị quên sẽ phải xác nhận mã ghép đôi lại.</string>
+    <string name="paired_macs_empty">Chưa có Mac nào được ghép đôi. Mac được ghép đôi ở lần đầu phát lên TV này.</string>
+    <string name="paired_macs_paired_on">Ghép đôi ngày %1$s</string>
+    <string name="paired_macs_forget">Quên</string>
 </resources>
