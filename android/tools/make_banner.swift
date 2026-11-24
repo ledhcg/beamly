@@ -1,4 +1,4 @@
-// Tạo banner 320x180 (xhdpi) cho Android TV launcher: nền gradient + biểu tượng TV + chữ "Mac2TV".
+// Tạo banner 320x180 (xhdpi) cho Android TV launcher: nền gradient + biểu tượng TV + chữ "Beamly".
 import AppKit
 
 let W = 320, H = 180
@@ -14,7 +14,7 @@ NSGradient(starting: NSColor(red: 0.31, green: 0.48, blue: 1.0, alpha: 1),
 let cfg = NSImage.SymbolConfiguration(pointSize: 62, weight: .semibold).applying(.init(paletteColors: [.white]))
 let sym = NSImage(systemSymbolName: "play.tv", accessibilityDescription: nil)!.withSymbolConfiguration(cfg)!
 let attrs: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 44, weight: .bold), .foregroundColor: NSColor.white]
-let text = "Mac2TV" as NSString
+let text = "Beamly" as NSString
 let ts = text.size(withAttributes: attrs)
 let gap: CGFloat = 14
 let total = sym.size.width + gap + ts.width

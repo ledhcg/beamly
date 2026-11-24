@@ -1,4 +1,4 @@
-package com.mac2tv.receiver
+package app.beamly.tv
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +7,8 @@ import androidx.activity.viewModels
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.mac2tv.receiver.ui.ReceiverApp
-import com.mac2tv.receiver.ui.theme.Mac2TvTheme
+import app.beamly.tv.ui.ReceiverApp
+import app.beamly.tv.ui.theme.BeamlyTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -22,13 +22,13 @@ class MainActivity : ComponentActivity() {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
         setContent {
-            Mac2TvTheme {
+            BeamlyTheme {
                 ReceiverApp(viewModel, onExit = ::finish)
             }
         }
     }
 
-    // Chỉ nhận kết nối khi app đang hiển thị: thoát ra màn hình chính là ngừng quảng bá và đóng cổng.
+    // Accept connections only while the app is visible: leaving it stops advertising and closes the port.
     override fun onStart() {
         super.onStart()
         viewModel.start()

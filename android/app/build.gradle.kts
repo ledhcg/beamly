@@ -7,23 +7,29 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// Ký bản release: dùng keystore.properties nếu có (storeFile, storePassword, keyAlias, keyPassword),
-// nếu không thì dùng debug keystore để cài đè được lên bản đang có trên TV.
+// One version for the whole project, read from the repository's VERSION file (MAJOR.MINOR.PATCH).
+val projectVersion = rootProject.file("../VERSION").readText().trim()
+val versionParts = projectVersion.split(".").map { it.toInt() }
+require(versionParts.size == 3) { "VERSION must be MAJOR.MINOR.PATCH, got '$projectVersion'" }
+
+// Release signing: android/keystore.properties (storeFile, storePassword, keyAlias, keyPassword),
+// written by CI from encrypted secrets. Without it, local release builds use the debug keystore.
 val keystoreProps = Properties().apply {
-    val f = rootProject.file("keystore.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
 
 android {
-    namespace = "com.mac2tv.receiver"
+    namespace = "app.beamly.tv"
     compileSdk = 35
 
     defaultConfig {
+        // Legacy application ID, kept so existing installs upgrade in place.
         applicationId = "com.mac2tv.receiver"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "2.3.0"
+        versionCode = versionParts[0] * 10_000 + versionParts[1] * 100 + versionParts[2]
+        versionName = projectVersion
     }
 
     signingConfigs {
@@ -88,4 +94,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.json)
+}
+
+tasks.withType<Test>().configureEach {
+    // Shared protocol fixtures live outside the Android project.
+    inputs.dir(rootProject.file("../protocol/test-vectors"))
 }

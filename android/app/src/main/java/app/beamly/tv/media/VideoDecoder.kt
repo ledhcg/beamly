@@ -1,18 +1,18 @@
-package com.mac2tv.receiver.media
+package app.beamly.tv.media
 
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.os.Build
 import android.util.Log
 import android.view.Surface
-import com.mac2tv.receiver.net.VideoConfig
+import app.beamly.tv.net.VideoConfig
 import java.nio.ByteBuffer
 
 /**
- * Giải mã H.264 (Annex-B) bằng phần cứng và hiển thị ngay lên [Surface].
+ * Decodes H.264 (Annex-B) in hardware and renders frames to a [Surface] immediately.
  *
- * Surface (do UI cấp) và cấu hình (do Mac gửi) có thể tới theo thứ tự bất kỳ và thay đổi bất cứ lúc nào;
- * mỗi lần đổi, decoder được tạo lại và chờ keyframe tiếp theo (Mac gửi keyframe mỗi 2 giây).
+ * The surface (from the UI) and the configuration (from the sender) can arrive in any order and change at any time;
+ * on every change the decoder is recreated and waits for the next key frame (sent at least every 2 seconds).
  * Thread-safe.
  */
 class VideoDecoder(private val onFrameRendered: () -> Unit) {
@@ -36,13 +36,13 @@ class VideoDecoder(private val onFrameRendered: () -> Unit) {
         config = newConfig
     }
 
-    /** Huỷ decoder và quên cấu hình (giữa hai phiên). */
+    /** Releases the decoder and forgets the configuration (between sessions). */
     fun reset() = synchronized(lock) {
         releaseCodec()
         config = null
     }
 
-    /** @return `true` nếu khung đã được đưa vào decoder, `false` nếu bị bỏ. */
+    /** @return `true` if the frame was queued to the decoder, `false` if it was dropped. */
     fun decode(data: ByteArray, length: Int, ptsUs: Long, keyFrame: Boolean): Boolean = synchronized(lock) {
         if (waitingForKeyFrame && !keyFrame) return false
         val c = codec ?: createCodec() ?: return false
@@ -67,7 +67,7 @@ class VideoDecoder(private val onFrameRendered: () -> Unit) {
             drain(c)
             true
         } catch (e: IllegalStateException) {
-            // MediaCodec.CodecException cũng là IllegalStateException
+            // MediaCodec.CodecException is an IllegalStateException too
             Log.e(TAG, "Decoder error, recreating", e)
             releaseCodec()
             false
@@ -89,7 +89,7 @@ class VideoDecoder(private val onFrameRendered: () -> Unit) {
             val index = c.dequeueOutputBuffer(info, 0)
             when {
                 index >= 0 -> {
-                    // Hiển thị ngay, không dùng PTS của Mac làm mốc hiển thị.
+                    // Render now; never use the sender's PTS as a display time.
                     c.releaseOutputBuffer(index, System.nanoTime())
                     onFrameRendered()
                 }
@@ -126,7 +126,7 @@ class VideoDecoder(private val onFrameRendered: () -> Unit) {
     }
 
     private fun releaseCodec() {
-        // release() trực tiếp: stop() có thể treo trên một số TV.
+        // release() directly: stop() hangs on some TV SoCs.
         codec?.let { runCatching { it.release() } }
         codec = null
         waitingForKeyFrame = true

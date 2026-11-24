@@ -1,4 +1,4 @@
-package com.mac2tv.receiver
+package app.beamly.tv
 
 import android.app.Application
 import android.net.ConnectivityManager
@@ -6,34 +6,29 @@ import android.net.LinkProperties
 import android.net.Network
 import android.view.Surface
 import androidx.lifecycle.AndroidViewModel
-import com.mac2tv.receiver.media.VideoDecoder
-import com.mac2tv.receiver.net.DeviceInfo
-import com.mac2tv.receiver.net.EndReason
-import com.mac2tv.receiver.net.NsdAdvertiser
-import com.mac2tv.receiver.net.Protocol
-import com.mac2tv.receiver.net.StreamServer
-import com.mac2tv.receiver.net.StreamStats
-import com.mac2tv.receiver.net.VideoConfig
-import com.mac2tv.receiver.net.VolumeState
+import app.beamly.tv.media.VideoDecoder
+import app.beamly.tv.net.DeviceInfo
+import app.beamly.tv.net.EndReason
+import app.beamly.tv.net.NsdAdvertiser
+import app.beamly.tv.net.Protocol
+import app.beamly.tv.net.StreamServer
+import app.beamly.tv.net.StreamStats
+import app.beamly.tv.net.VideoConfig
+import app.beamly.tv.net.VolumeState
+import java.io.IOException
+import java.net.BindException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.io.IOException
-import java.net.BindException
 
-/** Thông báo hiển thị trên màn hình chờ sau khi một phiên kết thúc. */
-enum class Notice { SENDER_STOPPED, CONNECTION_LOST, PROTOCOL_ERROR }
+/** Message shown on the waiting screen after a session ends. */
+enum class Notice { SENDER_STOPPED, CONNECTION_LOST, PROTOCOL_ERROR, INCOMPATIBLE_VERSION }
 
 sealed interface ReceiverUiState {
     data object Starting : ReceiverUiState
 
-    data class Waiting(
-        val deviceName: String,
-        val address: String?,
-        val port: Int,
-        val notice: Notice? = null,
-    ) : ReceiverUiState
+    data class Waiting(val deviceName: String, val address: String?, val port: Int, val notice: Notice? = null) : ReceiverUiState
 
     data class Connecting(val sender: String) : ReceiverUiState
 
@@ -43,18 +38,20 @@ sealed interface ReceiverUiState {
         val videoHeight: Int,
         val fps: Float = 0f,
         val mbps: Float = 0f,
-        val audio: Boolean = false,
+        val audio: Boolean = false
     ) : ReceiverUiState
 
     data class Failed(val portInUse: Boolean, val detail: String) : ReceiverUiState
 }
 
-class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.Listener {
+class ReceiverViewModel(app: Application) :
+    AndroidViewModel(app),
+    StreamServer.Listener {
 
     private val _state = MutableStateFlow<ReceiverUiState>(ReceiverUiState.Starting)
     val state: StateFlow<ReceiverUiState> = _state.asStateFlow()
 
-    /** Âm lượng Mac để hiện thanh âm lượng trên TV; [VolumeHud.seq] tăng mỗi lần Mac đổi âm lượng. */
+    /** Mac volume for the on-screen volume bar; [VolumeHud.seq] increases on every change. */
     data class VolumeHud(val volume: Float, val muted: Boolean, val seq: Int)
 
     private val _volumeHud = MutableStateFlow<VolumeHud?>(null)
@@ -65,10 +62,11 @@ class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.
     private val nsd = NsdAdvertiser(app)
     private val connectivity = app.getSystemService(ConnectivityManager::class.java)
 
-    /** Thông tin phiên đang hoạt động; chỉ sự kiện của phiên này mới được xử lý. */
+    /** The active session; callbacks for any other session are ignored. */
     private data class Session(val id: Long, val sender: String, val config: VideoConfig? = null)
 
     @Volatile private var session: Session? = null
+
     @Volatile private var firstFrameShown = false
     private var lastNotice: Notice? = null
     private var networkCallbackRegistered = false
@@ -111,7 +109,7 @@ class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.
 
     override fun onCleared() = stop()
 
-    // region StreamServer.Listener (gọi từ luồng IO)
+    // region StreamServer.Listener (called on IO threads)
 
     override fun onListening() {
         nsd.register(DeviceInfo.deviceName(getApplication()), Protocol.PORT)
@@ -121,7 +119,7 @@ class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.
     override fun onServerError(error: IOException) {
         _state.value = ReceiverUiState.Failed(
             portInUse = error is BindException,
-            detail = error.message ?: error.javaClass.simpleName,
+            detail = error.message ?: error.javaClass.simpleName
         )
     }
 
@@ -171,6 +169,7 @@ class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.
             EndReason.SENDER_STOPPED -> Notice.SENDER_STOPPED
             EndReason.CONNECTION_LOST -> Notice.CONNECTION_LOST
             EndReason.PROTOCOL_ERROR -> Notice.PROTOCOL_ERROR
+            EndReason.INCOMPATIBLE_VERSION -> Notice.INCOMPATIBLE_VERSION
             EndReason.CLOSED_LOCALLY -> null
         }
         if (server.isRunning) showWaiting()
@@ -178,7 +177,7 @@ class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.
 
     // endregion
 
-    /** Gọi trên luồng decoder mỗi khi một khung được hiển thị. */
+    /** Called on the decoder thread every time a frame is rendered. */
     private fun onFrameRendered() {
         if (firstFrameShown) return
         val s = session ?: return
@@ -193,7 +192,7 @@ class ReceiverViewModel(app: Application) : AndroidViewModel(app), StreamServer.
             deviceName = DeviceInfo.deviceName(app),
             address = DeviceInfo.localIpv4(app),
             port = Protocol.PORT,
-            notice = lastNotice,
+            notice = lastNotice
         )
     }
 

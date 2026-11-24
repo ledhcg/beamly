@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Mac2TVReceiver"
+rootProject.name = "Beamly"
 include(":app")

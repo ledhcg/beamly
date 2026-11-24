@@ -1,4 +1,4 @@
-package com.mac2tv.receiver.ui
+package app.beamly.tv.ui
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -21,13 +21,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -42,19 +42,19 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.mac2tv.receiver.BuildConfig
-import com.mac2tv.receiver.Notice
-import com.mac2tv.receiver.R
-import com.mac2tv.receiver.ReceiverUiState
-import com.mac2tv.receiver.ui.theme.Mac2TvColors
+import app.beamly.tv.BuildConfig
+import app.beamly.tv.Notice
+import app.beamly.tv.R
+import app.beamly.tv.ReceiverUiState
+import app.beamly.tv.ui.theme.BeamlyColors
 import kotlin.math.roundToInt
 
-/** Lề an toàn cho overscan của TV (~5%). */
+/** Safe area for TV overscan (about 5%). */
 private val SafeArea = Modifier.padding(horizontal = 64.dp, vertical = 40.dp)
 
 @Composable
 fun FullScreenBackground(content: @Composable BoxScope.() -> Unit) {
-    Box(Modifier.fillMaxSize().background(Mac2TvColors.Background).background(Mac2TvColors.BackgroundGradient)) {
+    Box(Modifier.fillMaxSize().background(BeamlyColors.Background).background(BeamlyColors.BackgroundGradient)) {
         content()
     }
 }
@@ -64,7 +64,7 @@ fun StartingScreen() = FullScreenBackground {
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         BreathingLogo()
         Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.status_starting), style = MaterialTheme.typography.titleLarge, color = Mac2TvColors.Muted)
+        Text(stringResource(R.string.status_starting), style = MaterialTheme.typography.titleLarge, color = BeamlyColors.Muted)
     }
 }
 
@@ -77,7 +77,7 @@ fun WaitingScreen(state: ReceiverUiState.Waiting, onNoticeShown: () -> Unit) = F
         }
     }
     Row(SafeArea.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-        // Cột trái: thương hiệu + hướng dẫn
+        // Left column: branding and instructions
         Column(Modifier.weight(1.15f).padding(end = 48.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppLogo(72.dp)
@@ -86,10 +86,10 @@ fun WaitingScreen(state: ReceiverUiState.Waiting, onNoticeShown: () -> Unit) = F
                     Text(
                         stringResource(R.string.app_name),
                         style = MaterialTheme.typography.displaySmall,
-                        color = Mac2TvColors.OnSurface,
-                        fontWeight = FontWeight.Bold,
+                        color = BeamlyColors.OnSurface,
+                        fontWeight = FontWeight.Bold
                     )
-                    Text(stringResource(R.string.tagline), style = MaterialTheme.typography.titleLarge, color = Mac2TvColors.Muted)
+                    Text(stringResource(R.string.tagline), style = MaterialTheme.typography.titleLarge, color = BeamlyColors.Muted)
                 }
             }
             Spacer(Modifier.height(56.dp))
@@ -100,38 +100,42 @@ fun WaitingScreen(state: ReceiverUiState.Waiting, onNoticeShown: () -> Unit) = F
             NumberedStep(3, stringResource(R.string.step_3))
             state.notice?.let { notice ->
                 Spacer(Modifier.height(40.dp))
-                NoticeBanner(noticeText(notice), Mac2TvColors.Warning)
+                NoticeBanner(noticeText(notice), BeamlyColors.Warning)
             }
         }
 
-        // Cột phải: trạng thái + thông tin kết nối
+        // Right column: status and connection details
         Panel(Modifier.weight(0.85f)) {
             Column(Modifier.fillMaxWidth().padding(36.dp)) {
-                StatusPill(stringResource(R.string.status_ready), Mac2TvColors.Success, pulsing = true)
+                StatusPill(stringResource(R.string.status_ready), BeamlyColors.Success, pulsing = true)
                 Spacer(Modifier.height(32.dp))
-                Text(stringResource(R.string.label_tv_name), style = MaterialTheme.typography.bodyLarge, color = Mac2TvColors.Muted)
+                Text(stringResource(R.string.label_tv_name), style = MaterialTheme.typography.bodyLarge, color = BeamlyColors.Muted)
                 Text(
                     state.deviceName,
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Mac2TvColors.OnSurface,
-                    fontWeight = FontWeight.SemiBold,
+                    color = BeamlyColors.OnSurface,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(24.dp))
-                Text(stringResource(R.string.label_address), style = MaterialTheme.typography.bodyLarge, color = Mac2TvColors.Muted)
+                Text(stringResource(R.string.label_address), style = MaterialTheme.typography.bodyLarge, color = BeamlyColors.Muted)
                 Text(
                     state.address?.let { "$it:${state.port}" } ?: stringResource(R.string.no_network),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = if (state.address != null) Mac2TvColors.OnSurface else Mac2TvColors.Warning,
+                    color = if (state.address != null) BeamlyColors.OnSurface else BeamlyColors.Warning
                 )
                 Spacer(Modifier.height(32.dp))
                 Text(
                     stringResource(R.string.same_network_hint),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Mac2TvColors.Muted,
+                    color = BeamlyColors.Muted
                 )
                 state.address?.let {
                     Spacer(Modifier.height(8.dp))
-                    Text(stringResource(R.string.cli_hint, it), style = MaterialTheme.typography.bodySmall, color = Mac2TvColors.Muted.copy(alpha = 0.7f))
+                    Text(
+                        stringResource(R.string.cli_hint, it),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = BeamlyColors.Muted.copy(alpha = 0.7f)
+                    )
                 }
             }
         }
@@ -139,8 +143,8 @@ fun WaitingScreen(state: ReceiverUiState.Waiting, onNoticeShown: () -> Unit) = F
     Text(
         "v${BuildConfig.VERSION_NAME}",
         style = MaterialTheme.typography.bodySmall,
-        color = Mac2TvColors.Muted.copy(alpha = 0.5f),
-        modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 64.dp, vertical = 24.dp),
+        color = BeamlyColors.Muted.copy(alpha = 0.5f),
+        modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 64.dp, vertical = 24.dp)
     )
 }
 
@@ -152,8 +156,8 @@ fun ConnectingScreen(state: ReceiverUiState.Connecting) = FullScreenBackground {
         Text(
             stringResource(R.string.connecting_to, state.sender),
             style = MaterialTheme.typography.headlineSmall,
-            color = Mac2TvColors.OnSurface,
-            textAlign = TextAlign.Center,
+            color = BeamlyColors.OnSurface,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -165,24 +169,27 @@ fun ErrorScreen(state: ReceiverUiState.Failed, onRetry: () -> Unit) = FullScreen
     Column(
         Modifier.fillMaxSize().then(SafeArea),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painterResource(R.drawable.ic_warning),
             contentDescription = null,
-            colorFilter = ColorFilter.tint(Mac2TvColors.Error),
-            modifier = Modifier.size(72.dp),
+            colorFilter = ColorFilter.tint(BeamlyColors.Error),
+            modifier = Modifier.size(72.dp)
         )
         Spacer(Modifier.height(24.dp))
-        Text(stringResource(R.string.error_title), style = MaterialTheme.typography.headlineLarge, color = Mac2TvColors.OnSurface)
+        Text(stringResource(R.string.error_title), style = MaterialTheme.typography.headlineLarge, color = BeamlyColors.OnSurface)
         Spacer(Modifier.height(12.dp))
         Text(
-            if (state.portInUse) stringResource(R.string.error_port_in_use, com.mac2tv.receiver.net.Protocol.PORT)
-            else stringResource(R.string.error_generic, state.detail),
+            if (state.portInUse) {
+                stringResource(R.string.error_port_in_use, app.beamly.tv.net.Protocol.PORT)
+            } else {
+                stringResource(R.string.error_generic, state.detail)
+            },
             style = MaterialTheme.typography.titleMedium,
-            color = Mac2TvColors.Muted,
+            color = BeamlyColors.Muted,
             textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(max = 720.dp),
+            modifier = Modifier.widthIn(max = 720.dp)
         )
         Spacer(Modifier.height(36.dp))
         Button(onClick = onRetry, modifier = Modifier.focusRequester(focus)) {
@@ -191,7 +198,7 @@ fun ErrorScreen(state: ReceiverUiState.Failed, onRetry: () -> Unit) = FullScreen
     }
 }
 
-/** Bảng thông tin luồng, hiện khi nhấn OK trong lúc phát. */
+/** Stream details, shown when OK is pressed while streaming. */
 @Composable
 fun StreamInfoPanel(state: ReceiverUiState.Streaming, modifier: Modifier = Modifier) {
     Panel(modifier.width(520.dp)) {
@@ -202,8 +209,8 @@ fun StreamInfoPanel(state: ReceiverUiState.Streaming, modifier: Modifier = Modif
                 Text(
                     stringResource(R.string.mirroring_from, state.sender),
                     style = MaterialTheme.typography.titleLarge,
-                    color = Mac2TvColors.OnSurface,
-                    fontWeight = FontWeight.SemiBold,
+                    color = BeamlyColors.OnSurface,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
             Spacer(Modifier.height(20.dp))
@@ -216,15 +223,15 @@ fun StreamInfoPanel(state: ReceiverUiState.Streaming, modifier: Modifier = Modif
             InfoRow(
                 stringResource(R.string.info_audio),
                 stringResource(if (state.audio) R.string.info_audio_on else R.string.info_audio_off),
-                Modifier.fillMaxWidth(),
+                Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(20.dp))
-            Text(stringResource(R.string.info_hint), style = MaterialTheme.typography.bodySmall, color = Mac2TvColors.Muted)
+            Text(stringResource(R.string.info_hint), style = MaterialTheme.typography.bodySmall, color = BeamlyColors.Muted)
         }
     }
 }
 
-/** Thanh âm lượng (theo âm lượng của Mac). */
+/** Volume bar mirroring the Mac's volume. */
 @Composable
 fun VolumePanel(volume: Float, muted: Boolean, modifier: Modifier = Modifier) {
     Panel(modifier) {
@@ -232,43 +239,43 @@ fun VolumePanel(volume: Float, muted: Boolean, modifier: Modifier = Modifier) {
             Image(
                 painterResource(if (muted || volume <= 0f) R.drawable.ic_volume_off else R.drawable.ic_volume),
                 contentDescription = stringResource(R.string.volume),
-                colorFilter = ColorFilter.tint(Mac2TvColors.OnSurface),
-                modifier = Modifier.size(28.dp),
+                colorFilter = ColorFilter.tint(BeamlyColors.OnSurface),
+                modifier = Modifier.size(28.dp)
             )
             Spacer(Modifier.width(16.dp))
             Box(
                 Modifier.width(220.dp).height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Mac2TvColors.OnSurface.copy(alpha = 0.15f)),
+                    .background(BeamlyColors.OnSurface.copy(alpha = 0.15f))
             ) {
                 Box(
                     Modifier.fillMaxHeight()
                         .fillMaxWidth(if (muted) 0f else volume)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(if (muted) Mac2TvColors.Muted else Mac2TvColors.Blue),
+                        .background(if (muted) BeamlyColors.Muted else BeamlyColors.Blue)
                 )
             }
             Spacer(Modifier.width(16.dp))
             Text(
                 if (muted) stringResource(R.string.volume_muted) else "${(volume * 100).roundToInt()}",
                 style = MaterialTheme.typography.titleMedium,
-                color = Mac2TvColors.OnSurface,
+                color = BeamlyColors.OnSurface,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.widthIn(min = 44.dp),
+                modifier = Modifier.widthIn(min = 44.dp)
             )
         }
     }
 }
 
-/** Viên thông báo ngắn ở trên màn hình (kết nối, nhắc thoát...). */
+/** Short on-screen message (connected, press BACK again, ...). */
 @Composable
 fun Toast(text: String, modifier: Modifier = Modifier) {
     Panel(modifier) {
         Text(
             text,
             style = MaterialTheme.typography.titleMedium,
-            color = Mac2TvColors.OnSurface,
-            modifier = Modifier.padding(horizontal = 28.dp, vertical = 14.dp),
+            color = BeamlyColors.OnSurface,
+            modifier = Modifier.padding(horizontal = 28.dp, vertical = 14.dp)
         )
     }
 }
@@ -280,7 +287,7 @@ private fun BreathingLogo() {
         initialValue = 0.94f,
         targetValue = 1.04f,
         animationSpec = infiniteRepeatable(tween(1100), RepeatMode.Reverse),
-        label = "scale",
+        label = "scale"
     )
     val alpha by transition.animateFloat(0.75f, 1f, infiniteRepeatable(tween(1100), RepeatMode.Reverse), label = "alpha")
     AppLogo(112.dp, Modifier.scale(scale).alpha(alpha))
@@ -292,5 +299,6 @@ private fun noticeText(notice: Notice): String = stringResource(
         Notice.SENDER_STOPPED -> R.string.notice_sender_stopped
         Notice.CONNECTION_LOST -> R.string.notice_connection_lost
         Notice.PROTOCOL_ERROR -> R.string.notice_protocol_error
-    },
+        Notice.INCOMPATIBLE_VERSION -> R.string.notice_incompatible_version
+    }
 )

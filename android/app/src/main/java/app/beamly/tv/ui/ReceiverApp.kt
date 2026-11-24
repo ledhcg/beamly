@@ -1,4 +1,4 @@
-package com.mac2tv.receiver.ui
+package app.beamly.tv.ui
 
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -40,9 +40,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mac2tv.receiver.R
-import com.mac2tv.receiver.ReceiverUiState
-import com.mac2tv.receiver.ReceiverViewModel
+import app.beamly.tv.R
+import app.beamly.tv.ReceiverUiState
+import app.beamly.tv.ReceiverViewModel
 import kotlinx.coroutines.delay
 
 private val InfoKeys = setOf(Key.DirectionCenter, Key.Enter, Key.NumPadEnter, Key.Info, Key.Menu)
@@ -56,14 +56,14 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
     var exitArmed by remember { mutableStateOf(false) }
     var showConnectedToast by remember { mutableStateOf(false) }
 
-    // Chỉ giữ màn hình sáng khi đang phát.
+    // Keep the screen on only while streaming.
     val view = LocalView.current
     DisposableEffect(streaming != null) {
         view.keepScreenOn = streaming != null
         onDispose { view.keepScreenOn = false }
     }
 
-    // Khi đang phát, BACK hai lần mới thoát để tránh bấm nhầm.
+    // While streaming, BACK must be pressed twice to exit, to avoid accidental exits.
     BackHandler(enabled = streaming != null) {
         if (exitArmed) onExit() else exitArmed = true
     }
@@ -107,12 +107,12 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
                     false
                 }
             },
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
-        // SurfaceView luôn nằm trong cây giao diện để surface sẵn sàng trước khi có hình.
+        // The SurfaceView stays in the hierarchy so its surface is ready before the first frame arrives.
         VideoSurface(
             aspectRatio = streaming?.let { it.videoWidth.toFloat() / it.videoHeight },
-            onSurfaceChanged = viewModel::setSurface,
+            onSurfaceChanged = viewModel::setSurface
         )
 
         when (val s = state) {
@@ -129,7 +129,7 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
                 visible = exitArmed,
                 enter = fadeIn() + slideInVertically { it },
                 exit = fadeOut() + slideOutVertically { it },
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp)
             ) {
                 Toast(stringResource(R.string.press_back_again))
             }
@@ -137,7 +137,7 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
                 visible = showInfo,
                 enter = fadeIn() + slideInHorizontally { -it / 4 },
                 exit = fadeOut() + slideOutHorizontally { -it / 4 },
-                modifier = Modifier.align(Alignment.TopStart).padding(48.dp),
+                modifier = Modifier.align(Alignment.TopStart).padding(48.dp)
             ) {
                 StreamInfoPanel(streaming)
             }
@@ -145,7 +145,7 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
                 visible = showConnectedToast && !showInfo,
                 enter = fadeIn() + slideInVertically { -it },
                 exit = fadeOut() + slideOutVertically { -it },
-                modifier = Modifier.align(Alignment.TopCenter).padding(top = 32.dp),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 32.dp)
             ) {
                 Toast(stringResource(R.string.mirroring_from, streaming.sender) + "  ·  " + stringResource(R.string.press_ok_for_info))
             }
@@ -153,7 +153,7 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
     }
 }
 
-/** Thanh âm lượng hiện vài giây mỗi khi Mac đổi âm lượng (bỏ qua lần đồng bộ đầu tiên khi kết nối). */
+/** Shows the volume bar for a few seconds whenever the Mac's volume changes (not for the initial sync). */
 @Composable
 private fun VolumeOverlay(viewModel: ReceiverViewModel, modifier: Modifier) {
     val hud by viewModel.volumeHud.collectAsStateWithLifecycle()
@@ -169,7 +169,7 @@ private fun VolumeOverlay(viewModel: ReceiverViewModel, modifier: Modifier) {
         visible = visible,
         enter = fadeIn() + slideInHorizontally { it / 3 },
         exit = fadeOut() + slideOutHorizontally { it / 3 },
-        modifier = modifier,
+        modifier = modifier
     ) {
         hud?.let { VolumePanel(it.volume, it.muted) }
     }
@@ -187,6 +187,6 @@ private fun VideoSurface(aspectRatio: Float?, onSurfaceChanged: (Surface?) -> Un
     }
     AndroidView(
         factory = { context -> SurfaceView(context).apply { holder.addCallback(holderCallback) } },
-        modifier = if (aspectRatio != null) Modifier.aspectRatio(aspectRatio) else Modifier.fillMaxSize(),
+        modifier = if (aspectRatio != null) Modifier.aspectRatio(aspectRatio) else Modifier.fillMaxSize()
     )
 }
