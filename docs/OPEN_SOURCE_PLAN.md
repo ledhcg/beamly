@@ -1,6 +1,6 @@
 # Open-Source Readiness Plan
 
-Status: **Phases 1–6 done; Phase 7 (going public) open** · Owner: @ledhcg · Last updated: 2026-11-24
+Status: **Public since 2026-11-25; remaining items below**  · Owner: @ledhcg · Last updated: 2026-11-24
 
 This plan takes the repository from a private prototype to a public, professionally maintained
 open-source project. Phases are ordered by dependency; each phase ends with a checklist that must be
@@ -34,7 +34,7 @@ Goal: every artifact a contributor reads is in English; Vietnamese becomes a tra
 - [x] macOS: user-facing strings moved to `Localizable.strings` (`en` source, `vi` translation); the CLI is English-only. *Deviation: `.strings` instead of a String Catalog, because SwiftPM builds do not compile `.xcstrings` into the hand-assembled app bundle.*
 - [x] Android: make `values/strings.xml` (English) the source of truth; keep `values-vi/` as a translation. No hard-coded user-facing strings in Kotlin.
 - [x] Remove or gate developer-only hooks: the `--connect` launch argument and the always-on file log (`~/Library/Logs/Mac2TV.log`) become a documented `--debug` flag.
-- [ ] Rewrite the initial commit message in English before going public (the commit is already pushed to the private repository, so this needs a one-time force-push; do it in Phase 7).
+- [x] Rewrite the initial commit message in English (one-time force-push before going public).
 
 **Exit criteria:** `grep` for Vietnamese diacritics outside `values-vi/` and the `vi` string catalog returns nothing.
 
@@ -93,7 +93,7 @@ Goal: a layout that new contributors understand in five minutes and that CI can 
 - [x] CodeQL scanning for Swift and Kotlin (`codeql.yml`; skipped while the repository is private, because code scanning on private repositories requires GitHub Advanced Security).
 - [x] Dependabot for `gradle` and `github-actions`.
 - [x] OpenSSF Scorecard workflow (runs once public); all actions pinned by commit SHA.
-- [ ] Branch protection on `main`: required CI, required review, linear history, no force-push.
+- [x] Ruleset on `main`: pull requests required, the three CI checks required and up to date, no force-push, no deletion (admins can bypass in emergencies). Reviews are not required while there is a single maintainer.
 
 **Exit criteria:** a PR that breaks formatting, lint, tests or build cannot be merged.
 
@@ -151,10 +151,11 @@ Planned work:
 
 ## Phase 7 — Going public
 
-- [ ] Secret scan of the full history (`gitleaks`), confirm no keystores, certificates, tokens or personal data.
-- [ ] Enable: private vulnerability reporting, Discussions, Dependabot alerts, secret scanning, push protection.
-- [ ] Repository metadata: description, topics (`screen-mirroring`, `android-tv`, `macos`, `screencapturekit`, `h264`), social preview image.
-- [ ] Switch visibility to public; publish `v1.0.0`.
+- [x] Secret scan of the full history (`gitleaks`, config in `.gitleaks.toml`) and a manual scan for personal data.
+- [x] Enable: private vulnerability reporting, Discussions, Dependabot alerts and security updates, secret scanning, push protection.
+- [x] Repository metadata: description and topics. **Manual: upload a social preview image (Settings → General), e.g. `docs/images/tv-stream-info.jpg`.**
+- [x] Switch visibility to public.
+- [ ] Publish the first release (`v0.9.0` → `v1.0.0` after the external review) once the signing secrets in `docs/RELEASING.md` exist.
 - [ ] Apply for the OpenSSF Best Practices badge (passing level).
 
 ---
