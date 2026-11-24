@@ -1,0 +1,7 @@
+# gitleaks configuration: `gitleaks git .` scans the whole history.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Deterministic protocol test vectors: keys derived from public labels, not secrets"
+paths = ['''^protocol/test-vectors/[^/]+\.json$''']
