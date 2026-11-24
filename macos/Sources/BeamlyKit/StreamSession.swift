@@ -16,6 +16,8 @@ public struct StreamOptions: Sendable {
     public var muteMacOutput = false
     /// How often `StreamEvent.stats` is emitted.
     public var statsInterval: TimeInterval = 2
+    /// Name shown on the TV; defaults to the Mac's computer name.
+    public var deviceName: String?
 
     public init() {}
 }
@@ -60,7 +62,9 @@ public final class StreamSession {
         onEvent: @escaping (StreamEvent) -> Void
     ) {
         emit = { event in DispatchQueue.main.async { onEvent(event) } }
-        sender = Sender(endpoint: endpoint, trustStore: trustStore)
+        sender = Sender(
+            endpoint: endpoint, trustStore: trustStore,
+            deviceName: options.deviceName ?? Host.current().localizedName ?? "Mac")
         capturer = ScreenCapturer(sender: sender, options: options)
 
         sender.onFailure = { [weak self] message in self?.finish(.error(message)) }

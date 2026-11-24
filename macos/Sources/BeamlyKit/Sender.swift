@@ -25,6 +25,7 @@ final class Sender {
     private let connection: NWConnection
     private let queue = DispatchQueue(label: "app.beamly.net")
     private let trustStore: TrustStore
+    private let deviceName: String
     private var phase = Phase.connecting
     private var ready = false
     private var closed = false
@@ -52,11 +53,12 @@ final class Sender {
     var onReady: (() -> Void)?
     var onFailure: ((String) -> Void)?
 
-    init(endpoint: NWEndpoint, trustStore: TrustStore) {
+    init(endpoint: NWEndpoint, trustStore: TrustStore, deviceName: String) {
         let tcp = NWProtocolTCP.Options()
         tcp.noDelay = true
         connection = NWConnection(to: endpoint, using: NWParameters(tls: nil, tcp: tcp))
         self.trustStore = trustStore
+        self.deviceName = deviceName
     }
 
     var remoteDescription: String {
@@ -150,7 +152,7 @@ final class Sender {
             helloPayload = PacketCodec.helloPayload(
                 deviceId: identity.deviceId, identityKey: identity.key.publicKey.x963Representation,
                 ephemeralKey: ephemeral.publicKey.x963Representation,
-                deviceName: Host.current().localizedName ?? "Mac")
+                deviceName: deviceName)
         } catch {
             fail("Cannot load this Mac's identity key: \(error.localizedDescription)")
             return
