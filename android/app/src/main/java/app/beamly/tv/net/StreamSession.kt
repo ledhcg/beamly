@@ -1,37 +1,40 @@
-package com.mac2tv.receiver.net
+package app.beamly.tv.net
 
 import android.util.Log
-import com.mac2tv.receiver.media.AudioPlayer
-import com.mac2tv.receiver.media.VideoDecoder
+import app.beamly.tv.media.AudioPlayer
+import app.beamly.tv.media.VideoDecoder
 import java.io.IOException
 import java.net.ProtocolException
 import java.net.Socket
 import java.net.SocketTimeoutException
 
-/** Lý do một phiên kết thúc. */
+/** Why a session ended. */
 enum class EndReason {
-    /** Mac chủ động dừng (gói BYE). */
+    /** The sender stopped on purpose (BYE packet). */
     SENDER_STOPPED,
 
-    /** Mất kết nối: socket đóng bất thường hoặc quá [Protocol.READ_TIMEOUT_MS] không có dữ liệu. */
+    /** The socket closed unexpectedly or no data arrived for [Protocol.READ_TIMEOUT_MS]. */
     CONNECTION_LOST,
 
-    /** Dữ liệu sai giao thức. */
+    /** The sender violated the protocol. */
     PROTOCOL_ERROR,
 
-    /** TV đóng phiên (kết nối mới thay thế, hoặc app dừng). */
-    CLOSED_LOCALLY,
+    /** The sender speaks a different protocol version; one of the apps needs an update. */
+    INCOMPATIBLE_VERSION,
+
+    /** The receiver closed the session (replaced by a new connection, or the app stopped). */
+    CLOSED_LOCALLY
 }
 
 data class StreamStats(val fps: Float, val mbps: Float, val audio: Boolean)
 
-/** Một kết nối từ Mac. [run] chặn luồng gọi cho tới khi phiên kết thúc. */
+/** One connection from a sender. [run] blocks the calling thread until the session ends. */
 class StreamSession(
     val id: Long,
     private val socket: Socket,
     private val input: java.io.InputStream,
     private val decoder: VideoDecoder,
-    private val listener: Listener,
+    private val listener: Listener
 ) {
     interface Listener {
         fun onSenderName(sessionId: Long, name: String)
@@ -63,8 +66,14 @@ class StreamSession(
                 val packet = reader.next() ?: return EndReason.CONNECTION_LOST
                 bytes += Protocol.HEADER_SIZE + packet.length
                 when (packet.type) {
-                    PacketType.HELLO ->
-                        listener.onSenderName(id, String(packet.payload, 0, packet.length, Charsets.UTF_8).trim())
+                    PacketType.HELLO -> {
+                        val hello = Hello.parse(packet.payload, packet.length)
+                        if (hello.protocolVersion != Protocol.VERSION) {
+                            Log.w(TAG, "Session $id: unsupported protocol version ${hello.protocolVersion}")
+                            return EndReason.INCOMPATIBLE_VERSION
+                        }
+                        listener.onSenderName(id, hello.deviceName)
+                    }
                     PacketType.CONFIG -> {
                         val config = VideoConfig.parse(packet.payload, packet.length)
                         decoder.configure(config)
@@ -109,8 +118,12 @@ class StreamSession(
             Log.i(TAG, "Session $id: timed out")
             EndReason.CONNECTION_LOST
         } catch (e: IOException) {
-            if (closedLocally) EndReason.CLOSED_LOCALLY else EndReason.CONNECTION_LOST.also {
-                Log.i(TAG, "Session $id: connection lost ($e)")
+            if (closedLocally) {
+                EndReason.CLOSED_LOCALLY
+            } else {
+                EndReason.CONNECTION_LOST.also {
+                    Log.i(TAG, "Session $id: connection lost ($e)")
+                }
             }
         } finally {
             audio.stop()

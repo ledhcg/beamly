@@ -1,11 +1,11 @@
-package com.mac2tv.receiver.net
+package app.beamly.tv.net
 
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.util.Log
 
-/** Quảng bá dịch vụ [Protocol.SERVICE_TYPE] qua mDNS/DNS-SD để Mac tự tìm thấy TV. */
+/** Advertises [Protocol.SERVICE_TYPE] over mDNS/DNS-SD so senders can find this TV. */
 class NsdAdvertiser(context: Context) {
 
     private val nsd = context.getSystemService(NsdManager::class.java)

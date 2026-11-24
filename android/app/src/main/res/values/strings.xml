@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Mac2TV</string>
-    <string name="tagline">Mirror your Mac to this TV</string>
+    <string name="app_name" translatable="false">Beamly</string>
+    <string name="tagline">Your Mac’s screen and sound on this TV</string>
 
     <string name="status_ready">Ready to connect</string>
     <string name="status_starting">Starting…</string>
 
-    <string name="step_1">On your Mac, click the Mac2TV icon in the menu bar</string>
+    <string name="step_1">On your Mac, click the Beamly icon in the menu bar</string>
     <string name="step_2">Choose “%1$s”</string>
     <string name="step_3">Your Mac screen and sound will appear here</string>
 
@@ -14,11 +14,12 @@
     <string name="label_address">Address</string>
     <string name="no_network">Not connected to a network</string>
     <string name="same_network_hint">Your Mac and this TV must be on the same Wi-Fi or LAN.</string>
-    <string name="cli_hint">Terminal: mac2tv %1$s</string>
+    <string name="cli_hint">Terminal: beamly %1$s</string>
 
     <string name="notice_sender_stopped">Your Mac stopped mirroring.</string>
     <string name="notice_connection_lost">Connection to your Mac was lost.</string>
-    <string name="notice_protocol_error">Received invalid data. Make sure Mac2TV on your Mac is up to date.</string>
+    <string name="notice_protocol_error">Received invalid data. Make sure Beamly on your Mac is up to date.</string>
+    <string name="notice_incompatible_version">Beamly on your Mac and on this TV are different versions. Update both to the latest version.</string>
 
     <string name="connecting_to">Connecting to %1$s…</string>
     <string name="mirroring_from">Mirroring from %1$s</string>

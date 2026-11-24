@@ -1,7 +1,13 @@
-package com.mac2tv.receiver.net
+package app.beamly.tv.net
 
 import android.util.Log
-import com.mac2tv.receiver.media.VideoDecoder
+import app.beamly.tv.media.VideoDecoder
+import java.io.BufferedInputStream
+import java.io.IOException
+import java.net.InetSocketAddress
+import java.net.ServerSocket
+import java.net.Socket
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,22 +18,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
-import java.io.BufferedInputStream
-import java.io.IOException
-import java.net.InetSocketAddress
-import java.net.ServerSocket
-import java.net.Socket
-import java.util.concurrent.atomic.AtomicLong
 
 /**
- * Nghe kết nối TCP từ Mac. Mỗi lúc chỉ có một phiên; kết nối mới luôn thay thế phiên cũ
- * (kể cả khi phiên cũ treo hoặc mạng rớt mà không báo).
+ * Accepts TCP connections from senders. There is one session at a time; a new connection always
+ * replaces the current one (even if the current one is stuck or its network dropped silently).
  */
-class StreamServer(
-    private val port: Int,
-    private val decoder: VideoDecoder,
-    private val listener: Listener,
-) {
+class StreamServer(private val port: Int, private val decoder: VideoDecoder, private val listener: Listener) {
     interface Listener : StreamSession.Listener {
         fun onListening()
         fun onServerError(error: IOException)
@@ -38,6 +34,7 @@ class StreamServer(
     private val ids = AtomicLong()
     private val lock = Any()
     private var scope: CoroutineScope? = null
+
     @Volatile private var serverSocket: ServerSocket? = null
     private var current: Pair<StreamSession, Job>? = null
     private val promotion = Mutex()
@@ -96,9 +93,9 @@ class StreamServer(
     }
 
     /**
-     * Chỉ nhận kết nối khi Mac đã gửi dữ liệu (gói HELLO được gửi ngay khi kết nối).
-     * Network.framework trên Mac có thể mở song song nhiều kết nối tới các địa chỉ khác nhau của TV
-     * (Happy Eyeballs) rồi huỷ kết nối thua — những kết nối đó không gửi gì và không được thay phiên đang chạy.
+     * Promotes a connection only after the sender has sent data (HELLO is sent immediately).
+     * Network.framework may open parallel connections to several of the TV's addresses (Happy Eyeballs)
+     * and abandon the losers; those never send anything and must not replace the running session.
      */
     private suspend fun handshake(scope: CoroutineScope, socket: Socket) {
         val input = try {
@@ -119,7 +116,7 @@ class StreamServer(
     }
 
     private suspend fun startSession(scope: CoroutineScope, socket: Socket, input: java.io.InputStream) {
-        // Đóng phiên cũ và chờ nó dọn dẹp xong (decoder/audio dùng chung) trước khi bắt đầu phiên mới.
+        // Close the previous session and wait for its cleanup (decoder and audio are shared) before starting.
         val previous = synchronized(lock) { current }
         previous?.let { (session, job) ->
             session.close()

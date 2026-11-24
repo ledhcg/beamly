@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="tagline">Phát màn hình Mac lên TV này</string>
+    <string name="tagline">Màn hình và âm thanh của Mac trên TV này</string>
 
     <string name="status_ready">Sẵn sàng kết nối</string>
     <string name="status_starting">Đang khởi động…</string>
 
-    <string name="step_1">Trên Mac, bấm biểu tượng Mac2TV trên thanh menu</string>
+    <string name="step_1">Trên Mac, bấm biểu tượng Beamly trên thanh menu</string>
     <string name="step_2">Chọn “%1$s”</string>
     <string name="step_3">Màn hình và âm thanh của Mac sẽ hiện ở đây</string>
 
@@ -13,11 +13,12 @@
     <string name="label_address">Địa chỉ</string>
     <string name="no_network">Chưa kết nối mạng</string>
     <string name="same_network_hint">Mac và TV cần cùng mạng Wi-Fi hoặc LAN.</string>
-    <string name="cli_hint">Terminal: mac2tv %1$s</string>
+    <string name="cli_hint">Terminal: beamly %1$s</string>
 
     <string name="notice_sender_stopped">Mac đã dừng phát.</string>
     <string name="notice_connection_lost">Mất kết nối với Mac.</string>
-    <string name="notice_protocol_error">Dữ liệu không hợp lệ. Hãy cập nhật Mac2TV trên Mac.</string>
+    <string name="notice_protocol_error">Dữ liệu không hợp lệ. Hãy cập nhật Beamly trên Mac.</string>
+    <string name="notice_incompatible_version">Beamly trên Mac và trên TV khác phiên bản. Hãy cập nhật cả hai lên bản mới nhất.</string>
 
     <string name="connecting_to">Đang kết nối với %1$s…</string>
     <string name="mirroring_from">Đang phát từ %1$s</string>
