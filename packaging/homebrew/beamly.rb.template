@@ -1,0 +1,19 @@
+cask "beamly" do
+  version "@VERSION@"
+  sha256 "@SHA256@"
+
+  url "https://github.com/ledhcg/beamly/releases/download/v#{version}/Beamly-#{version}.dmg"
+  name "Beamly"
+  desc "Mirror the screen and sound to an Android TV on the local network"
+  homepage "https://github.com/ledhcg/beamly"
+
+  depends_on macos: ">= :sonoma"
+
+  app "Beamly.app"
+  binary "#{appdir}/Beamly.app/Contents/Helpers/beamly"
+
+  zap trash: [
+    "~/Library/Logs/Beamly.log",
+    "~/Library/Preferences/com.mac2tv.sender.plist",
+  ]
+end

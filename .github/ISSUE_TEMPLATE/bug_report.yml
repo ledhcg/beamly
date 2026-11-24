@@ -1,0 +1,66 @@
+name: Bug report
+description: Something does not work as expected
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please check [Troubleshooting](https://github.com/ledhcg/beamly#troubleshooting) first.
+        **Security issues must not be reported here** — see SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Beamly on the TV
+        2. Choose the TV in the Mac menu bar
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: beamly-version
+    attributes:
+      label: Beamly version
+      description: Mac app (About / `beamly --help`) and TV app (Android settings → Apps → Beamly).
+      placeholder: "0.9.0"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac model
+      placeholder: macOS 15.2, MacBook Air M2
+    validations:
+      required: true
+  - type: input
+    id: tv
+    attributes:
+      label: TV model and Android version
+      placeholder: Sony Bravia XR, Android TV 12
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network
+      options:
+        - Both on Wi-Fi
+        - Mac on Wi-Fi, TV on Ethernet
+        - Mac on Ethernet, TV on Wi-Fi
+        - Both on Ethernet
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Mac: `open -a Beamly --args --debug`, then attach `~/Library/Logs/Beamly.log`.
+        TV: `adb logcat -s StreamServer StreamSession VideoDecoder AudioPlayer NsdAdvertiser`.
+        Remove anything you consider private.
+      render: text
