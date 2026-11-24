@@ -1,0 +1,28 @@
+/* Menu bar status line */
+"status.idle" = "Chưa phát";
+"status.connecting" = "Đang kết nối tới %@…";
+"status.connected" = "Đã kết nối %@, đang khởi động…";
+"status.streaming" = "Đang phát tới %@";
+"status.streamingFps" = "Đang phát tới %@ · %.0f fps";
+"status.notFound" = "Không thấy %@";
+"status.permission" = "Cần quyền ghi màn hình";
+"status.stopped" = "Đã dừng: %@";
+
+/* Menu items */
+"menu.stop" = "Dừng phát";
+"menu.section.tvs" = "Phát tới TV";
+"menu.noTV" = "Không thấy TV — hãy mở Beamly trên TV";
+"menu.quality" = "Chất lượng";
+"menu.frameRate" = "Khung hình";
+"menu.display" = "Màn hình";
+"menu.audio" = "Truyền âm thanh";
+"menu.tvOnly" = "Chỉ phát tiếng ở TV";
+"menu.launchAtLogin" = "Mở cùng macOS";
+"menu.quit" = "Thoát Beamly";
+
+/* Alerts */
+"alert.loginItem.title" = "Không thay đổi được mục mở cùng macOS";
+"alert.permission.title" = "Beamly cần quyền ghi màn hình";
+"alert.permission.body" = "Mở System Settings › Privacy & Security › Screen & System Audio Recording, bật Beamly, rồi mở lại app.";
+"alert.permission.open" = "Mở System Settings";
+"alert.permission.later" = "Để sau";

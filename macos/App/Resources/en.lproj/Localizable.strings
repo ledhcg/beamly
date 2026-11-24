@@ -1,0 +1,28 @@
+/* Menu bar status line */
+"status.idle" = "Not streaming";
+"status.connecting" = "Connecting to %@…";
+"status.connected" = "Connected to %@, starting…";
+"status.streaming" = "Streaming to %@";
+"status.streamingFps" = "Streaming to %@ · %.0f fps";
+"status.notFound" = "%@ is not available";
+"status.permission" = "Screen Recording permission needed";
+"status.stopped" = "Stopped: %@";
+
+/* Menu items */
+"menu.stop" = "Stop Streaming";
+"menu.section.tvs" = "Stream to TV";
+"menu.noTV" = "No TV found — open Beamly on your TV";
+"menu.quality" = "Quality";
+"menu.frameRate" = "Frame Rate";
+"menu.display" = "Display";
+"menu.audio" = "Send Audio";
+"menu.tvOnly" = "Play Sound Only on TV";
+"menu.launchAtLogin" = "Open at Login";
+"menu.quit" = "Quit Beamly";
+
+/* Alerts */
+"alert.loginItem.title" = "Couldn’t change Open at Login";
+"alert.permission.title" = "Beamly needs Screen Recording permission";
+"alert.permission.body" = "Open System Settings › Privacy & Security › Screen & System Audio Recording, turn on Beamly, then reopen the app.";
+"alert.permission.open" = "Open System Settings";
+"alert.permission.later" = "Not Now";

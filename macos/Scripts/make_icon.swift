@@ -1,4 +1,4 @@
-// Tạo icon 1024x1024 cho Mac2TV: nền gradient bo góc + biểu tượng TV.
+// Renders the 1024x1024 app icon: rounded gradient tile with a TV symbol. Usage: swift make_icon.swift out.png
 import AppKit
 
 let px = 1024
