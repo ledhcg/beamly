@@ -18,6 +18,11 @@ struct ProtocolTests {
             struct Expected: Decodable {
                 let protocolVersion: UInt16?
                 let deviceName: String?
+                let deviceIdHex: String?
+                let identityKeyHex: String?
+                let ephemeralKeyHex: String?
+                let knowsSender: Bool?
+                let name: String?
                 let width: Int?
                 let height: Int?
                 let spsHex: String?
@@ -80,9 +85,24 @@ struct ProtocolTests {
     @Test func helloPayload() throws {
         let vector = Self.packet("hello")
         let expected = try #require(vector.expected)
+        let deviceId = Data(hex: try #require(expected.deviceIdHex))
+        let uuid = deviceId.withUnsafeBytes { UUID(uuid: $0.load(as: uuid_t.self)) }
         let payload = PacketCodec.helloPayload(
+            deviceId: uuid, identityKey: Data(hex: try #require(expected.identityKeyHex)),
+            ephemeralKey: Data(hex: try #require(expected.ephemeralKeyHex)),
             deviceName: try #require(expected.deviceName), version: try #require(expected.protocolVersion))
         #expect(payload.hex == vector.payloadHex)
+    }
+
+    @Test func serverHelloParsing() throws {
+        let vector = Self.packet("server-hello")
+        let expected = try #require(vector.expected)
+        let hello = try ServerHello.parse(Data(hex: vector.payloadHex))
+        #expect(hello.knowsSender == expected.knowsSender)
+        #expect(hello.identityKey.hex == expected.identityKeyHex)
+        #expect(hello.ephemeralKey.hex == expected.ephemeralKeyHex)
+        #expect(hello.name == expected.name)
+        #expect(throws: BeamlyError.self) { try ServerHello.parse(Data(hex: vector.payloadHex).prefix(100)) }
     }
 
     @Test(arguments: ["volume", "volume-muted"])

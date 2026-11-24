@@ -26,3 +26,14 @@
 "alert.permission.body" = "Mở System Settings › Privacy & Security › Screen & System Audio Recording, bật Beamly, rồi mở lại app.";
 "alert.permission.open" = "Mở System Settings";
 "alert.permission.later" = "Để sau";
+
+/* Pairing */
+"status.pairing" = "Đang ghép đôi với %@…";
+"alert.pairing.title" = "Ghép đôi với “%@”?";
+"alert.pairing.body" = "Kiểm tra TV hiện đúng mã này, rồi xác nhận trên cả hai thiết bị:\n\n%@";
+"alert.pairing.confirm" = "Mã trùng khớp";
+"alert.pairing.cancel" = "Huỷ";
+"menu.forgetTVs" = "Quên các TV đã ghép đôi…";
+"alert.forget.title" = "Quên tất cả TV đã ghép đôi?";
+"alert.forget.body" = "Lần tới khi phát lên TV, bạn sẽ phải xác nhận mã ghép đôi lại.";
+"alert.forget.confirm" = "Quên";

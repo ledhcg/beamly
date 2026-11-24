@@ -19,6 +19,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var isStreaming = false
     /// `--connect NAME`: start streaming to NAME as soon as it is discovered (used for automation and testing).
     private var pendingConnect: String?
+    /// True while the pairing-code alert is on screen, so it can be dismissed if the session ends.
+    private var pairingAlertVisible = false
 
     // MARK: Lifecycle
 
@@ -157,6 +159,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
         menu.addItem(
+            item(L("menu.forgetTVs"), #selector(forgetPairedTVs), enabled: !TrustStore.shared.pairedTVs.isEmpty))
+        menu.addItem(
             item(
                 L("menu.launchAtLogin"), #selector(toggleLaunchAtLogin),
                 checked: SMAppService.mainApp.status == .enabled))
@@ -208,7 +212,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func handle(_ event: StreamEvent, tvName: String) {
         DebugLog.write("Event: \(event)")
+        if pairingAlertVisible {
+            switch event {
+            case .streaming, .stopped: NSApp.abortModal()
+            default: break
+            }
+        }
         switch event {
+        case .pairing(let code, let pairingTVName, let respond):
+            status = L("status.pairing", pairingTVName)
+            updateIcon()
+            rebuildMenu()
+            showPairingAlert(code: code, tvName: pairingTVName, respond: respond)
+            return
         case .connected:
             status = L("status.connected", tvName)
         case .streaming:
@@ -265,6 +281,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func toggleAudioOnTVOnly() {
         settings.audioOnTVOnly.toggle()
         restartIfStreaming()
+    }
+
+    /// Asks the user to compare the code with the one on the TV. Runs modally on the main thread; the alert is
+    /// aborted if the session ends meanwhile (for example, when the TV declines).
+    private func showPairingAlert(code: String, tvName: String, respond: @escaping (Bool) -> Void) {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = L("alert.pairing.title", tvName)
+        alert.informativeText = L("alert.pairing.body", code)
+        alert.addButton(withTitle: L("alert.pairing.confirm"))
+        alert.addButton(withTitle: L("alert.pairing.cancel"))
+        pairingAlertVisible = true
+        let response = alert.runModal()
+        pairingAlertVisible = false
+        switch response {
+        case .alertFirstButtonReturn: respond(true)
+        case .alertSecondButtonReturn: respond(false)
+        default: break  // aborted: the session already ended
+        }
+    }
+
+    @objc private func forgetPairedTVs() {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = L("alert.forget.title")
+        alert.informativeText = L("alert.forget.body")
+        alert.addButton(withTitle: L("alert.forget.confirm"))
+        alert.addButton(withTitle: L("alert.pairing.cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        do {
+            try TrustStore.shared.forgetAllTVs()
+        } catch {
+            status = L("status.stopped", error.localizedDescription)
+        }
+        rebuildMenu()
     }
 
     @objc private func toggleLaunchAtLogin() {

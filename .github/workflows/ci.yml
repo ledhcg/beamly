@@ -26,6 +26,10 @@ jobs:
         run: swift format lint --strict --recursive Sources Tests Package.swift
       - name: Unit tests
         run: swift test --package-path macos
+      - name: Crypto test vectors are up to date
+        run: |
+          swift protocol/generate_crypto_vectors.swift
+          git diff --exit-code protocol/test-vectors/crypto.json
       - name: Build app bundle (ad-hoc signed)
         env:
           SIGN_IDENTITY: "-"

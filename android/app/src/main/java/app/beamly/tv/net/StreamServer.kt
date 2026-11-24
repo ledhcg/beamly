@@ -23,7 +23,13 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Accepts TCP connections from senders. There is one session at a time; a new connection always
  * replaces the current one (even if the current one is stuck or its network dropped silently).
  */
-class StreamServer(private val port: Int, private val decoder: VideoDecoder, private val listener: Listener) {
+class StreamServer(
+    private val port: Int,
+    private val decoder: VideoDecoder,
+    private val pairing: PairingStore,
+    private val tvName: () -> String,
+    private val listener: Listener
+) {
     interface Listener : StreamSession.Listener {
         fun onListening()
         fun onServerError(error: IOException)
@@ -61,6 +67,12 @@ class StreamServer(private val port: Int, private val decoder: VideoDecoder, pri
         serverSocket = null
         session?.first?.close()
         s?.cancel()
+    }
+
+    /** Forwards the TV user's pairing decision to the session that asked for it. */
+    fun respondToPairing(sessionId: Long, accepted: Boolean) {
+        val session = synchronized(lock) { current?.first }
+        if (session?.id == sessionId) session.respondToPairing(accepted)
     }
 
     private suspend fun acceptLoop(scope: CoroutineScope) {
@@ -124,7 +136,7 @@ class StreamServer(private val port: Int, private val decoder: VideoDecoder, pri
                 Log.w(TAG, "Session ${session.id} did not stop in time")
             }
         }
-        val session = StreamSession(ids.incrementAndGet(), socket, input, decoder, listener)
+        val session = StreamSession(ids.incrementAndGet(), socket, input, decoder, pairing, tvName, listener)
         Log.i(TAG, "Session ${session.id} from ${session.remoteAddress}")
         listener.onSessionStarted(session.id, session.remoteAddress)
         val job = scope.launch {

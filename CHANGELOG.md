@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Pairing: the first connection between a Mac and a TV shows the same 6-digit code on both screens; both users
+  confirm it. The TV lists paired Macs and can forget them; the Mac can forget paired TVs (menu or
+  `beamly --forget-tvs`).
+- End-to-end encryption: authenticated key exchange and AES-256-GCM for every packet.
+
+### Changed
+
+- **Wire protocol version 2.** Mac and TV apps must be updated together.
+
+### Security
+
+- A TV only accepts streams from Macs its user paired with; streams can no longer be watched or injected on the
+  local network.
+
 ## [0.9.0] - 2026-11-24
 
 First version prepared for open source.

@@ -10,6 +10,8 @@ import app.beamly.tv.media.VideoDecoder
 import app.beamly.tv.net.DeviceInfo
 import app.beamly.tv.net.EndReason
 import app.beamly.tv.net.NsdAdvertiser
+import app.beamly.tv.net.PairedMac
+import app.beamly.tv.net.PairingStore
 import app.beamly.tv.net.Protocol
 import app.beamly.tv.net.StreamServer
 import app.beamly.tv.net.StreamStats
@@ -23,7 +25,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /** Message shown on the waiting screen after a session ends. */
-enum class Notice { SENDER_STOPPED, CONNECTION_LOST, PROTOCOL_ERROR, INCOMPATIBLE_VERSION }
+enum class Notice {
+    SENDER_STOPPED,
+    CONNECTION_LOST,
+    PROTOCOL_ERROR,
+    INCOMPATIBLE_VERSION,
+    NOT_PAIRED,
+    PAIRING_DECLINED,
+    PAIRING_CANCELLED,
+    PAIRING_TIMED_OUT
+}
 
 sealed interface ReceiverUiState {
     data object Starting : ReceiverUiState
@@ -31,6 +42,9 @@ sealed interface ReceiverUiState {
     data class Waiting(val deviceName: String, val address: String?, val port: Int, val notice: Notice? = null) : ReceiverUiState
 
     data class Connecting(val sender: String) : ReceiverUiState
+
+    /** First connection from [macName]: the user compares [code] with the Mac. [accepted]: waiting for the Mac. */
+    data class Pairing(val macName: String, val code: String, val accepted: Boolean = false) : ReceiverUiState
 
     data class Streaming(
         val sender: String,
@@ -58,7 +72,11 @@ class ReceiverViewModel(app: Application) :
     val volumeHud: StateFlow<VolumeHud?> = _volumeHud.asStateFlow()
 
     private val decoder = VideoDecoder(::onFrameRendered)
-    private val server = StreamServer(Protocol.PORT, decoder, this)
+    private val pairing = PairingStore(app)
+    private val server = StreamServer(Protocol.PORT, decoder, pairing, { DeviceInfo.deviceName(app) }, this)
+
+    /** Macs allowed to stream to this TV. */
+    val pairedMacs: StateFlow<List<PairedMac>> = pairing.pairedMacs
     private val nsd = NsdAdvertiser(app)
     private val connectivity = app.getSystemService(ConnectivityManager::class.java)
 
@@ -102,6 +120,15 @@ class ReceiverViewModel(app: Application) :
 
     fun setSurface(surface: Surface?) = decoder.setSurface(surface)
 
+    /** The TV user compared the pairing code: [accepted] if it matches the Mac's. */
+    fun respondToPairing(accepted: Boolean) {
+        val s = session ?: return
+        server.respondToPairing(s.id, accepted)
+        if (accepted) _state.update { if (it is ReceiverUiState.Pairing) it.copy(accepted = true) else it }
+    }
+
+    fun forgetMac(mac: PairedMac) = pairing.forget(mac)
+
     fun dismissNotice() {
         lastNotice = null
         _state.update { if (it is ReceiverUiState.Waiting) it.copy(notice = null) else it }
@@ -142,6 +169,16 @@ class ReceiverViewModel(app: Application) :
         }
     }
 
+    override fun onPairingRequest(sessionId: Long, macName: String, code: String) {
+        if (session?.id != sessionId) return
+        _state.value = ReceiverUiState.Pairing(macName, "${code.take(3)} ${code.drop(3)}")
+    }
+
+    override fun onPaired(sessionId: Long) {
+        val s = session?.takeIf { it.id == sessionId } ?: return
+        _state.value = ReceiverUiState.Connecting(s.sender)
+    }
+
     override fun onVideoConfig(sessionId: Long, config: VideoConfig) {
         val s = session?.takeIf { it.id == sessionId } ?: return
         session = s.copy(config = config)
@@ -170,6 +207,10 @@ class ReceiverViewModel(app: Application) :
             EndReason.CONNECTION_LOST -> Notice.CONNECTION_LOST
             EndReason.PROTOCOL_ERROR -> Notice.PROTOCOL_ERROR
             EndReason.INCOMPATIBLE_VERSION -> Notice.INCOMPATIBLE_VERSION
+            EndReason.NOT_PAIRED -> Notice.NOT_PAIRED
+            EndReason.PAIRING_DECLINED -> Notice.PAIRING_DECLINED
+            EndReason.PAIRING_CANCELLED -> Notice.PAIRING_CANCELLED
+            EndReason.PAIRING_TIMED_OUT -> Notice.PAIRING_TIMED_OUT
             EndReason.CLOSED_LOCALLY -> null
         }
         if (server.isRunning) showWaiting()

@@ -28,9 +28,12 @@ public enum StopReason: Sendable {
     case error(String)
 }
 
-public enum StreamEvent: Sendable {
+public enum StreamEvent {
     /// TCP connection established; the associated value is the TV's address.
     case connected(String)
+    /// First connection to this TV: show `code` and call `respond` with whether the user confirmed that the TV
+    /// shows the same code. The TV asks its user too; pairing succeeds only if both accept.
+    case pairing(code: String, tvName: String, respond: (Bool) -> Void)
     /// Capture started; the associated value describes the stream.
     case streaming(String)
     case stats(fps: Double, dropped: Int)
@@ -52,17 +55,26 @@ public final class StreamSession {
     private let lock = NSLock()
     private var finished = false
 
-    public init(endpoint: NWEndpoint, options: StreamOptions, onEvent: @escaping (StreamEvent) -> Void) {
+    public init(
+        endpoint: NWEndpoint, options: StreamOptions, trustStore: TrustStore = .shared,
+        onEvent: @escaping (StreamEvent) -> Void
+    ) {
         emit = { event in DispatchQueue.main.async { onEvent(event) } }
-        sender = Sender(endpoint: endpoint)
+        sender = Sender(endpoint: endpoint, trustStore: trustStore)
         capturer = ScreenCapturer(sender: sender, options: options)
 
         sender.onFailure = { [weak self] message in self?.finish(.error(message)) }
         capturer.onFailure = { [weak self] message in self?.finish(.error(message)) }
         capturer.onStats = { [weak self] fps, dropped in self?.emit(.stats(fps: fps, dropped: dropped)) }
-        sender.onReady = { [weak self] in
+        sender.onConnected = { [weak self] in
             guard let self else { return }
             self.emit(.connected(self.sender.remoteDescription))
+        }
+        sender.onPairing = { [weak self] request in
+            self?.emit(.pairing(code: request.code, tvName: request.tvName, respond: request.respond))
+        }
+        sender.onReady = { [weak self] in
+            guard let self else { return }
             Task {
                 do {
                     let description = try await self.capturer.start()

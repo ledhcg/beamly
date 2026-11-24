@@ -14,8 +14,8 @@
   <img src="https://img.shields.io/badge/Android%20TV-8.0%2B-3ddc84" alt="Android TV 8.0+">
 </p>
 
-> **Status: pre-1.0.** Beamly works day to day, but the stream is not yet authenticated or encrypted.
-> Use it only on networks you trust. See [Security](#security).
+> **Status: pre-1.0.** Streams are paired and end-to-end encrypted; the protocol may still change before 1.0.
+> See [Security](#security).
 
 ## Features
 
@@ -25,6 +25,8 @@
 - **Zero configuration.** The TV advertises itself over Bonjour/DNS-SD; the Mac finds it automatically.
 - **Menu bar app** with quality, frame rate, display and audio settings, plus a **command-line sender** for scripts.
 - **10-foot TV interface** built with Compose for TV: works with a D-pad, shows stream details on demand.
+- **Paired and encrypted:** a Mac must be approved on the TV once, by comparing a 6-digit code on both screens;
+  every session is authenticated and encrypted with AES-256-GCM.
 - **Resilient sessions:** heartbeats, clean stop signalling, automatic recovery when either side disappears.
 
 ## Requirements
@@ -59,7 +61,12 @@ adb install -r beamly-tv.apk
 
 1. Open **Beamly** on the TV. It shows its name and address and waits for a Mac.
 2. Click the **Beamly** icon in the Mac's menu bar and choose the TV.
-3. Click the TV again (or **Stop Streaming**) to stop.
+3. **First time only:** both screens show the same 6-digit code. Check that they match, then click **Codes Match**
+   on the Mac and choose **Allow** on the TV.
+4. Click the TV again (or **Stop Streaming**) to stop.
+
+Paired Macs are listed on the TV under **Paired Macs**, where they can be forgotten. On the Mac, use
+**Forget Paired TVs…** in the menu (or `beamly --forget-tvs`).
 
 On the TV, press **OK** to show stream details and **BACK** twice to exit.
 
@@ -104,9 +111,16 @@ Platform-specific commands are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Security
 
-The current protocol has no authentication and no encryption: any device on the same network can stream to a TV
-that has Beamly open, and the stream can be observed on the network. Pairing and encryption are planned before
-1.0 — see the [roadmap](docs/OPEN_SOURCE_PLAN.md). Report vulnerabilities as described in [SECURITY.md](SECURITY.md).
+- **Pairing:** the TV only shows streams from Macs its user approved, and the Mac only streams to TVs its user
+  approved. Approval compares a 6-digit code on both screens (numeric comparison, as in Bluetooth pairing): an
+  attacker on the network has a one-in-a-million chance per attempt, and each attempt needs both users to approve.
+- **Encryption:** each session derives fresh keys (ECDH on P-256 with long-term and per-session keys, HKDF-SHA256)
+  and encrypts every packet with AES-256-GCM, so the screen, the sound and even the packet types stay private.
+- **Keys:** each device's identity key stays on the device (the TV's app storage; the Mac's
+  `~/Library/Application Support/Beamly/`, readable only by your account).
+
+Details are in the [protocol specification](docs/PROTOCOL.md#2-security-model). Report vulnerabilities as described
+in [SECURITY.md](SECURITY.md).
 
 Beamly has no telemetry and makes no connections outside your local network.
 

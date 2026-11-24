@@ -58,10 +58,33 @@ class ProtocolTest {
     fun parsesSharedHello() {
         val expected = vector("hello").getJSONObject("expected")
         val packet = decode("hello")
-        assertEquals(
-            Hello(expected.getInt("protocolVersion"), expected.getString("deviceName")),
-            Hello.parse(packet.payload, packet.length)
+        val hello = Hello.parse(packet.payload, packet.length)
+        assertEquals(expected.getInt("protocolVersion"), hello.protocolVersion)
+        assertArrayEquals(hex(expected.getString("deviceIdHex")), hello.deviceId)
+        assertArrayEquals(hex(expected.getString("identityKeyHex")), hello.identityKey)
+        assertArrayEquals(hex(expected.getString("ephemeralKeyHex")), hello.ephemeralKey)
+        assertEquals(expected.getString("deviceName"), hello.deviceName)
+    }
+
+    @Test
+    fun helloFromAnOlderVersionOnlyReportsTheVersion() {
+        val v1 = byteArrayOf(0, 1) + "Old Mac".toByteArray()
+        val hello = Hello.parse(v1, v1.size)
+        assertEquals(1, hello.protocolVersion)
+        assertEquals("", hello.deviceName)
+    }
+
+    @Test
+    fun encodesSharedServerHello() {
+        val vector = vector("server-hello")
+        val expected = vector.getJSONObject("expected")
+        val payload = ServerHello.encode(
+            knowsSender = expected.getBoolean("knowsSender"),
+            identityKey = hex(expected.getString("identityKeyHex")),
+            ephemeralKey = hex(expected.getString("ephemeralKeyHex")),
+            name = expected.getString("name")
         )
+        assertArrayEquals(hex(vector.getString("payloadHex")), payload)
     }
 
     @Test

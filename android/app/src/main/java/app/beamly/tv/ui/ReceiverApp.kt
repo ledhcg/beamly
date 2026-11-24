@@ -88,9 +88,18 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
         }
     }
 
-    val focus = remember { FocusRequester() }
+    var showPairedMacs by remember { mutableStateOf(false) }
+    val pairedMacs by viewModel.pairedMacs.collectAsStateWithLifecycle()
+    BackHandler(enabled = showPairedMacs) { showPairedMacs = false }
     LaunchedEffect(state::class) {
-        if (state !is ReceiverUiState.Failed) runCatching { focus.requestFocus() }
+        // A Mac connecting takes over the screen.
+        if (state !is ReceiverUiState.Waiting) showPairedMacs = false
+    }
+
+    // The root only takes focus while streaming (to receive OK); other screens focus their own buttons.
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(streaming != null) {
+        if (streaming != null) runCatching { focus.requestFocus() }
     }
 
     Box(
@@ -117,8 +126,22 @@ fun ReceiverApp(viewModel: ReceiverViewModel, onExit: () -> Unit) {
 
         when (val s = state) {
             ReceiverUiState.Starting -> StartingScreen()
-            is ReceiverUiState.Waiting -> WaitingScreen(s, onNoticeShown = viewModel::dismissNotice)
+            is ReceiverUiState.Waiting -> if (showPairedMacs) {
+                PairedMacsScreen(pairedMacs, onForget = viewModel::forgetMac)
+            } else {
+                WaitingScreen(
+                    s,
+                    pairedCount = pairedMacs.size,
+                    onShowPairedMacs = { showPairedMacs = true },
+                    onNoticeShown = viewModel::dismissNotice
+                )
+            }
             is ReceiverUiState.Connecting -> ConnectingScreen(s)
+            is ReceiverUiState.Pairing -> PairingScreen(
+                s,
+                onAllow = { viewModel.respondToPairing(true) },
+                onDeny = { viewModel.respondToPairing(false) }
+            )
             is ReceiverUiState.Failed -> ErrorScreen(s, onRetry = viewModel::retry)
             is ReceiverUiState.Streaming -> Unit
         }

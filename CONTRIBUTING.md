@@ -59,7 +59,9 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 17)   # or the Homebrew openjdk@17 
 adb connect <tv-address>:5555
 adb install -r build/beamly-tv.apk
 adb shell am start -n com.mac2tv.receiver/app.beamly.tv.MainActivity
-build/beamly                     # Ctrl+C to stop; the TV must return to its waiting screen
+build/beamly                     # first run: compare the pairing code, press Return, choose Allow on the TV
+                                 # Ctrl+C to stop; the TV must return to its waiting screen
+build/beamly --forget-tvs        # forget paired TVs to test pairing again
 adb logcat -s StreamServer StreamSession VideoDecoder AudioPlayer NsdAdvertiser
 adb shell screencap -p /sdcard/s.png && adb pull /sdcard/s.png
 ```
